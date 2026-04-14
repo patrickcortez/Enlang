@@ -28,9 +28,9 @@ namespace Enlang.Utils
                     continue;
                 }
 
-                if (seperators.Contains(c))
+                if (seperators.Contains(c)) // '=',',', etc...
                 {
-                    tmp.Add(nstr.ToString());
+                    tmp.Add(nstr.ToString()); // store to String List once we encounter any Seperator.
                     nstr.Clear();
                 }
 
@@ -39,6 +39,18 @@ namespace Enlang.Utils
 
             return tmp.ToArray();
 
+        }
+
+        public static string TrimTo(string data,int start,int range)
+        {
+            StringBuilder Nstr = new StringBuilder();
+
+            for(int x = start;x < range; x++)
+            {
+                Nstr.Append(data[x]);
+            }
+
+            return Nstr.ToString();
         }
 
     }
