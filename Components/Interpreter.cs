@@ -56,7 +56,7 @@
             }
         }
 
-        private void RetreatTo(int range= 1)
+        private void RetreatTo(int range= 1) //for loops, functions and etc...
         {
             int tmp = index - range;
             if(index >= 0)
@@ -68,9 +68,12 @@
         // Start Exectuting Instructions
         private void ReadInstructions()
         {
-            while (true) // Replaced Foreach with While for better control over the flow
+            while (index < Instructions.Count) // Replaced Foreach with While for better control over the flow
             {
+                Token instruction = current();
 
+                Execute(instruction.name, instruction.variable.value);
+                AdvanceTo();
             }
         }
     }

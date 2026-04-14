@@ -22,9 +22,15 @@ namespace Enlang.Components
 
         public Core(string src)
         {
-            if (!File.Exists(src))
+            if (!File.Exists(src)) // if file does not exist 
             {
                 Console.Error.WriteLine($"File {src} does not exist!");
+                return;
+            }
+
+            if (Path.GetExtension(src) != ".enl") // if file isn't valid we halt exeu
+            {
+                Console.Error.WriteLine($"File: {src} is not a .enl file!");
                 return;
             }
 
@@ -90,46 +96,25 @@ namespace Enlang.Components
                             
                             if (instruction == "print") // if its a print token
                             {
-                                Instructions.Add(new Token(Types.Print,(current,data))); // (print,message)
+                                Instructions.Add(new Token(Types.Print,data)); // (message)
                             }else if(instruction == "ïnput") // otherise if its an input
                             {
-                                Instructions.Add(new Token(Types.Input,(current,data))); // (input,variable_name)
+                                Instructions.Add(new Token(Types.Input,data)); // (variable_name)
                             }
 
                         }
                         else // if its not a syntax/instruction we store it as an error.
                         {
 
-                            Instructions.Add(new Token(Types.Error,(string.Empty,null), words[0]));
+                            Instructions.Add(new Token(Types.Error,words[0]));
 
                         }
                     }
                     else
                     {
                         // key and value for variable
-                        string key = words[0],
-                               type = DetermineDataType(words[1]);
 
-                        object value;
-                        
-                        //manual Data type determiner
-                        if(type == "Integer")
-                        {
-                            value = CastObject<int>(words[1]);
-                        }else if(type == "float")
-                        {
-                            value = CastObject<float>(words[1]);
-                        }else if(type == "Boolean")
-                        {
-                            value = CastObject<bool>(words[1]);
-                        }
-                        else
-                        {
-                            value = words[1];
-                        }
-                        
-
-                        Instructions.Add(new Token(Types.Variable, (key, value))); // (Variable_Name,Value)
+                        Instructions.Add(new Token(Types.Variable, string.Join('=',words))); // (Variable_Name,Value)
                     }
                 }
             

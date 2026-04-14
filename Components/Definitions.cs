@@ -1,6 +1,4 @@
-﻿using Variable = (string name, object value); //variable and instruction definition
-
-namespace Enlang.Components
+﻿namespace Enlang.Components
 {
     internal enum Types // Declaring our Token types: Print, Variable and Input
     {
@@ -40,26 +38,25 @@ namespace Enlang.Components
     internal struct Token // Token Definition
     {
         public readonly Types type ;
-        public Variable variable;
-        public string ErrorValue = string.Empty;
+        public string line;
 
-        public Token(Types tokentype,Variable var,string Error = "") // Token type: Print, Input or Variable. 
+        public Token(Types tokentype,string ln,string Error = "") // Token type: Print, Input or Variable. 
         {
 
 
             if(tokentype == Types.Variable) // If the token is a variable we finally store the var parameter in the variable member.
             {
                 type = tokentype;
-                variable = var;
+                line = ln;
             }else if(tokentype == Types.Error) // If its an unrecognized instruction, we store it as an Error to log later.
             {
                 type = tokentype;
-                ErrorValue = Error;
+                line = Error;
             }
             else // Otherwise we leave it variable uninitialized and just store the tokentype.
             {
                 type = tokentype;
-                variable = var;
+                line = ln;
             }
         }
     }
