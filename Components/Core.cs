@@ -3,7 +3,7 @@ using static Enlang.Utils.Utility;
 
 /*
  * Syntaxes:
- *  - output("text")
+ *  - print("text")
  *  - input(var)
  *  - name=value
  */
