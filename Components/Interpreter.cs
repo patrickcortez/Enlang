@@ -3,6 +3,7 @@
     internal class Interpreter
     {
         List<Token> Instructions;
+        int index = 0;
 
         public Interpreter(List<Token> instructions)
         {
@@ -39,21 +40,37 @@
             }
         }
 
+
+        // Controls
+        private Token current()
+        {
+            return Instructions[index];
+        }
+
+        private void AdvanceTo(int range= 1)
+        {
+            int tmp = index + range;
+            if(tmp < Instructions.Count)
+            {
+                index+=range;
+            }
+        }
+
+        private void RetreatTo(int range= 1)
+        {
+            int tmp = index - range;
+            if(index >= 0)
+            {
+                index -= range;
+            }
+        }
+
+        // Start Exectuting Instructions
         private void ReadInstructions()
         {
-            foreach(Token instruction in Instructions)
+            while (true) // Replaced Foreach with While for better control over the flow
             {
-                if(instruction.type == Types.Error) // print Errors
-                {
-                    print(instruction.ErrorValue, true);
-                }
-                else if(instruction.type == Types.Variable)
-                {
-                    continue; // variables are already handled in the Tokenizer, so no need to go over them again.
-                }
 
-                Execute(instruction.variable.name, instruction.variable.value); // print and input
-                
             }
         }
     }
