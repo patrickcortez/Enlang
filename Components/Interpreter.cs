@@ -1,18 +1,20 @@
-﻿using Variable = (string key, object value); // for single variable
-using Variables = (string key, object[] values); //for arrays
+﻿
+using static Enlang.Components.Misc.TypeCaster;
+using static Enlang.Utils.Utility;
+using Enlang.Utils;
 
 namespace Enlang.Components
 {
     internal class Interpreter
     {
+        Dictionary<string,object> Variables;
         List<Token> Instructions;
-        List<Variable> VarMap;
         int index = 0;
 
         public Interpreter(List<Token> instructions)
         {
             Instructions = new List<Token>(instructions);
-            VarMap = new List<Variable>();
+            Variables = new Dictionary<string, object>();
             ReadInstructions();
         }
 
@@ -28,9 +30,52 @@ namespace Enlang.Components
             }
         }
 
-        private void input(object? variable) // handle input
+        private object input() // handle input
         {
-           variable = Console.ReadLine();
+           object variable;
+
+
+            while ((variable = Console.ReadLine()) != null)
+            {
+                if((variable = Console.ReadLine()) == null) 
+                {
+                    Console.Error.WriteLine("Input Cannot be empty!");
+
+                    Console.Clear();
+                    continue;
+                }
+            }
+               
+                return variable;
+
+        }
+
+        private void HandleVariable(string line)
+        {
+            string[] words = Tokenize(line, '=');
+            string key = words[0];
+            object value;
+            string dtype = DetermineDataType(words[1]);
+
+
+            if (dtype == "Integer")
+            {
+                value = int.Parse(words[1]);
+            }
+            else if (dtype == "float")
+            {
+                value = float.Parse(words[1]);
+            }
+            else if (dtype == "Boolean")
+            {
+                value = bool.Parse(words[1]);
+            }
+            else
+            {
+                value = words[1];
+            }
+
+            Variables.Add(key,value);
         }
 
 
@@ -39,9 +84,16 @@ namespace Enlang.Components
             if(type == Types.Print)
             {
                 print(line);
-            }if(type == Types.Input)
+            }
+            
+            if(type == Types.Input)
             {
-                //PlaceHolder
+               Variables[line] = input();
+            }
+
+            if(type == Types.Variable)
+            {
+                HandleVariable(line);
             }
         }
 
@@ -73,12 +125,19 @@ namespace Enlang.Components
         // Start Exectuting Instructions
         private void ReadInstructions()
         {
-            while (index < Instructions.Count) // Replaced Foreach with While for better control over the flow
+            while (true) // Replaced Foreach with While for better control over the flow
             {
                 Token instruction = current();
 
+                if (instruction.type == Types.End)
+                {
+                    break;
+                }
+
                 Execute(instruction.type, instruction.line);
                 AdvanceTo();
+
+
             }
         }
     }

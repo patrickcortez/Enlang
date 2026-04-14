@@ -117,6 +117,8 @@ namespace Enlang.Components
                         Instructions.Add(new Token(Types.Variable, string.Join('=',words))); // (Variable_Name,Value)
                     }
                 }
+
+                Instructions.Add(new Token(Types.End, "null")); // signifies an end of a program
             
             }
         }

@@ -5,7 +5,8 @@
         Print, //Outputing text
         Variable, //Storing data
         Input, // Acquiring user input
-        Error
+        Error,
+        End
     }
 
     internal enum MathTypes // For Aritthmetic
