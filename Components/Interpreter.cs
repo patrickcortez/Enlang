@@ -1,13 +1,18 @@
-﻿namespace Enlang.Components
+﻿using Variable = (string key, object value); // for single variable
+using Variables = (string key, object[] values); //for arrays
+
+namespace Enlang.Components
 {
     internal class Interpreter
     {
         List<Token> Instructions;
+        List<Variable> VarMap;
         int index = 0;
 
         public Interpreter(List<Token> instructions)
         {
             Instructions = new List<Token>(instructions);
+            VarMap = new List<Variable>();
             ReadInstructions();
         }
 
@@ -29,14 +34,14 @@
         }
 
 
-        private void Execute(string instruction,params object[] value) // Execute instructions
+        private void Execute(Types type,string line) // Execute instructions
         {
-            if(instruction == "print")
+            if(type == Types.Print)
             {
-                print((string)value[0]);
-            }if(instruction == "input")
+                print(line);
+            }if(type == Types.Input)
             {
-                input(value[0]);
+                //PlaceHolder
             }
         }
 
@@ -72,7 +77,7 @@
             {
                 Token instruction = current();
 
-                Execute(instruction.name, instruction.variable.value);
+                Execute(instruction.type, instruction.line);
                 AdvanceTo();
             }
         }
