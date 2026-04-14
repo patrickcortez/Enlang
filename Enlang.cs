@@ -1,5 +1,4 @@
-﻿
-using Enlang.Components;
+﻿using Enlang.Components;
 
 namespace Enlang;
 

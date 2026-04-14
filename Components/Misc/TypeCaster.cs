@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Enlang.Components.Misc
+﻿namespace Enlang.Components.Misc
 {
     internal static class TypeCaster
     {

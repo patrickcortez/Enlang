@@ -1,8 +1,6 @@
-﻿using Enlang.Components.Misc;
-using System.Text;
-using static Enlang.Utils.Utility;
+﻿using System.Text;
 using static Enlang.Components.Misc.TypeCaster;
-using System.ComponentModel.DataAnnotations;
+using static Enlang.Utils.Utility;
 
 /*
  * Syntaxes:
@@ -102,7 +100,7 @@ namespace Enlang.Components
                         else // if its not a syntax/instruction we store it as an error.
                         {
 
-                            Instructions.Add(new Token(Types.Error, null, words[0]));
+                            Instructions.Add(new Token(Types.Error,(string.Empty,null), words[0]));
 
                         }
                     }
