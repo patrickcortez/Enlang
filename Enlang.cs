@@ -33,5 +33,11 @@ public class Enlang // this class acts as a entry point to the interpreter and a
         {
             PrintHelp();
         }
+
+        if (args[0] == "run")
+        {
+            string fpath = Path.Combine(Environment.CurrentDirectory, args[1]);
+            Run(fpath);
+        }
     }
 }

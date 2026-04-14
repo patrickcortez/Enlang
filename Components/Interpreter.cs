@@ -38,13 +38,10 @@ namespace Enlang.Components
 
             while ((variable = Console.ReadLine()) != null)
             {
-                if((variable = Console.ReadLine()) == null) 
-                {
                     Console.Error.WriteLine("Input Cannot be empty!");
 
-                    Console.Clear();
                     continue;
-                }
+
             }
                
                 return variable;
