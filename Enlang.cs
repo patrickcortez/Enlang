@@ -25,6 +25,7 @@ public class Enlang // this class acts as a entry point to the interpreter and a
     public static void Run(string filepath) // runs all  enl files
     {
         Core start = new Core(filepath); // initialize our Interpreter core
+        start.BeginInterpret();
     }
 
     public static void Main(string[] args)

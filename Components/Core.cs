@@ -1,5 +1,8 @@
-﻿using System.Text;
+﻿using Enlang.Components.Misc;
+using System.Text;
 using static Enlang.Utils.Utility;
+using static Enlang.Components.Misc.TypeCaster;
+using System.ComponentModel.DataAnnotations;
 
 /*
  * Syntaxes:
@@ -84,13 +87,15 @@ namespace Enlang.Components
 
                         if (isSyntax(words[0],ref current, '('))
                         {
-                            string instruction = words[0].Remove(words[0].IndexOf('('), words.Length - (words.IndexOf(current)+1)); // print("Hello") : print -> 5, ("hello") - 9 over all its 14 - 5
+                            string instruction = words[0].Remove(words[0].IndexOf('('), words.Length - current.Length); // print("Hello") : print -> 5, ("hello") - 9 over all its 14 - 5
+                            string data = words[0].Remove(0, current.Length);
+                            
                             if (instruction == "print") // if its a print token
                             {
-                                Instructions.Add(new Token(Types.Print));
+                                Instructions.Add(new Token(Types.Print,(current,data))); // (print,message)
                             }else if(instruction == "ïnput") // otherise if its an input
                             {
-                                Instructions.Add(new Token(Types.Input));
+                                Instructions.Add(new Token(Types.Input,(current,data))); // (input,variable_name)
                             }
 
                         }
@@ -103,11 +108,39 @@ namespace Enlang.Components
                     }
                     else
                     {
-                        Instructions.Add(new Token(Types.Variable, (words[0], words[1])));
+                        // key and value for variable
+                        string key = words[0],
+                               type = DetermineDataType(words[1]);
+
+                        object value;
+                        
+                        //manual Data type determiner
+                        if(type == "Integer")
+                        {
+                            value = CastObject<int>(words[1]);
+                        }else if(type == "float")
+                        {
+                            value = CastObject<float>(words[1]);
+                        }else if(type == "Boolean")
+                        {
+                            value = CastObject<bool>(words[1]);
+                        }
+                        else
+                        {
+                            value = words[1];
+                        }
+                        
+
+                        Instructions.Add(new Token(Types.Variable, (key, value))); // (Variable_Name,Value)
                     }
                 }
             
             }
+        }
+
+        internal void BeginInterpret()
+        {
+            Interpreter interpret = new Interpreter(Instructions);
         }
     }
 }
