@@ -39,9 +39,9 @@ namespace Enlang.Components
 
     internal struct Token // Token Definition
     {
-        Types type ;
-        Variable variable;
-        string ErrorValue = string.Empty;
+        public readonly Types type ;
+        public Variable variable;
+        public string ErrorValue = string.Empty;
 
         public Token(Types tokentype,Variable var,string Error = "") // Token type: Print, Input or Variable. 
         {
