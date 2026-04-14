@@ -10,7 +10,7 @@
             ReadInstructions();
         }
 
-        private void print(string msg,bool isError = false)
+        private void print(string msg,bool isError = false) //handle output
         {
             if (isError)
             {
@@ -22,13 +22,13 @@
             }
         }
 
-        private void input(object? variable)
+        private void input(object? variable) // handle input
         {
            variable = Console.ReadLine();
         }
 
 
-        private void Execute(string instruction,params object[] value)
+        private void Execute(string instruction,params object[] value) // Execute instructions
         {
             if(instruction == "print")
             {
@@ -43,16 +43,16 @@
         {
             foreach(Token instruction in Instructions)
             {
-                if(instruction.type == Types.Error)
+                if(instruction.type == Types.Error) // print Errors
                 {
-                    continue;
+                    print(instruction.ErrorValue, true);
                 }
                 else if(instruction.type == Types.Variable)
                 {
-                    continue;
+                    continue; // variables are already handled in the Tokenizer, so no need to go over them again.
                 }
 
-                Execute(instruction.variable.name, instruction.variable.value);
+                Execute(instruction.variable.name, instruction.variable.value); // print and input
                 
             }
         }
