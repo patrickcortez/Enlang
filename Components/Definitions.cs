@@ -11,25 +11,26 @@
 
     internal enum MathTypes // For Aritthmetic
     {
-        Number,
-        Plus,
-        Minus,
-        Multiply,
-        Divide,
+        Number, // 1-9
+        Plus, // +
+        Minus, // -
+        Multiply, // *
+        Divide, // /
+        Power, // ^
+        Lpar, // (
+        Rpar, // )
         End
     }
 
     internal struct MathToken // Math Tokens
     {
-        MathTypes type; // token type
-        char Operation; // if token is a Arithmetic operator
-        float value; // float by default so we have decimal places during division.
+        public MathTypes type; // token type
+        public float value; // float by default so we have decimal places during division.
 
 
-        public MathToken(MathTypes mathtype,char op = ' ',float val = 0.0F)
+        public MathToken(MathTypes mathtype,float val = 0.0F)
         {
             type = mathtype;
-            Operation = op;
             value = val;
         }
     }

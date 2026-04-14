@@ -1,7 +1,8 @@
 ﻿
 using static Enlang.Components.Misc.TypeCaster;
 using static Enlang.Utils.Utility;
-using Enlang.Utils;
+using Enlang.Components.Calculate;
+using System.Text;
 
 namespace Enlang.Components
 {
@@ -50,32 +51,92 @@ namespace Enlang.Components
 
         }
 
+        private object ConvertValue(object value, string dtype, string val) // Convert Value to its data type
+        {
+
+            if (dtype == "Integer") // int
+            {
+                value = int.Parse(val);
+            }
+            else if (dtype == "float") // float
+            {
+                value = float.Parse(val);
+            }
+            else if (dtype == "Boolean") // boolean
+            {
+                value = bool.Parse(val);
+            }
+            else // string is our default
+            {
+                value = val;
+
+            }
+
+            return value;
+        }
+
+
         private void HandleVariable(string line)
         {
+
             string[] words = Tokenize(line, '=');
             string key = words[0];
-            object value;
+            object value = new object();
             string dtype = DetermineDataType(words[1]);
 
+            if (!Arithmetic.isArithmetic(words[1])) // if the line is not Arithmetic then we simply store the variable name and its value
+            {
+                if (!Variables.ContainsKey(key))
+                {
 
-            if (dtype == "Integer")
-            {
-                value = int.Parse(words[1]);
-            }
-            else if (dtype == "float")
-            {
-                value = float.Parse(words[1]);
-            }
-            else if (dtype == "Boolean")
-            {
-                value = bool.Parse(words[1]);
+                    if (!Variables.ContainsKey(words[1]))
+                    {
+                        value = ConvertValue(value, dtype, words[1]);
+
+                        Variables.Add(key, value); // add the new variable in the
+                    }
+                    else
+                    {
+                        value = Variables[words[1]];
+
+                        Variables.Add(key, value);
+                    }
+                }
+                else //if Variable already exists
+                {
+
+                    if (!Variables.ContainsKey(words[1]))
+                    {
+                        value = ConvertValue(value, dtype, words[1]);
+
+                        Variables[key] = value; // change the current variables value to the new one.
+                    }
+                    else
+                    {
+                        value = Variables[words[1]];
+                        Variables[key] = value;
+                    }
+                }
             }
             else
             {
-                value = words[1];
-            }
+                string tmp = words[1].Trim();
+                if (Variables.Count > 0) // if variable count is greater than 0 then we start replacing variables in the expression.
+                {
+                    tmp = ReplaceWords(words[1], Variables.Keys.ToArray(), Variables, '$').Trim();
+                }
 
-            Variables.Add(key,value);
+                if (!Variables.ContainsKey(key)) // if the variable already exists replace their value.
+                {
+                    Arithmetic arith = new Arithmetic(words[1]);
+                    Variables.Add(key, arith.Begin());
+                }
+                else
+                {
+                    Arithmetic arith = new Arithmetic(words[1]);
+                    Variables[key] = arith.Begin();
+                }
+            }
         }
 
 

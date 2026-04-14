@@ -51,5 +51,45 @@ namespace Enlang.Utils
             return Nstr.ToString();
         }
 
+        public static float Strinf(string data)
+        {
+            StringBuilder nStr = new StringBuilder();
+
+            foreach(char c in data)
+            {
+                if(char.IsDigit(c) || c == '.')
+                {
+                    nStr.Append(c);
+                }
+
+                continue;
+
+            }
+
+
+            return float.Parse(nStr.ToString());
+        }
+
+        public static string ReplaceWords(string data, string[] oldWords,Dictionary<string,object> Variables,char prefix)
+        {
+            List<string> NoldWords = new List<string>(); // $(VariableName)
+
+            foreach(string word in oldWords)
+            {
+                NoldWords.Add(string.Concat(prefix, word));
+            }
+
+            StringBuilder nStr = new StringBuilder(data);
+
+            foreach(string word in NoldWords)
+            {
+                nStr.Replace(word, Variables[word.Remove(0, 1)].ToString());
+            }
+
+
+            return nStr.ToString();
+
+        }
+
     }
 }

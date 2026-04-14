@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿name="Patrick"
 
-namespace Enlang.Tests
-{
-    class Test1
-    {
-    }
-}
+print("My name is $Patrick ")
+
+age=0
+
+input(age)
+
+print("My age is &age")
