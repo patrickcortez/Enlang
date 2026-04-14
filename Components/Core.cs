@@ -32,7 +32,7 @@ namespace Enlang.Components
             Lex();
         }
 
-        private bool isSyntax(string word,char terminator) // Syntax Checker
+        private bool isSyntax(string word,ref string current,char terminator) // Syntax Checker
         {
             StringBuilder nstr = new StringBuilder(); // Initialize our string builder.
 
@@ -49,6 +49,7 @@ namespace Enlang.Components
 
             if (syntax.Contains(nstr.ToString()))
             {
+                current = nstr.ToString();
                 return true;
             }
 
@@ -66,16 +67,24 @@ namespace Enlang.Components
                 string line;
                 while((line = sr.ReadLine()) != null)
                 {
+
+                    if (string.IsNullOrWhiteSpace(line)) // skip every newlines
+                    {
+                        continue;
+                    }
+
+                    string current = string.Empty;
                     string[] words = Tokenize(line,'='); // We tokenize the entire line before evaluating
+                    
 
                     if (words.Length < 2) // if the length of words is less than 2, its always an instruction
                     { 
 
                         
 
-                        if (isSyntax(words[0], '('))
+                        if (isSyntax(words[0],ref current, '('))
                         {
-                            string instruction = words[0].Remove(words[0].IndexOf('('), words[0].IndexOf(')') + 1);
+                            string instruction = words[0].Remove(words[0].IndexOf('('), words.Length - (words.IndexOf(current)+1)); // print("Hello") : print -> 5, ("hello") - 9 over all its 14 - 5
                             if (instruction == "print") // if its a print token
                             {
                                 Instructions.Add(new Token(Types.Print));

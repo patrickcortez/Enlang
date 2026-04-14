@@ -6,12 +6,26 @@ its purely for educational attainment on how interpreters work.
 
 **Enlang** for now has 3 basic instructions output, input and variable declaration:
 
- - `output("text")` : This outputs "text" to the Console
+ - `print("text")` : This outputs "text" to the Console
  - 'input(var)' : This captures the users input and stores it on a variable named *var*
  - `name=value` : This declares a variable.
 
-For now none of them are implemented just yet, its just the basic initialization of the
-project. Work on the project will begin tomorrow.
+With these basic instructions, you can write simple programs:
+
+```Enlang
+name="Patrick"
+
+print("Hello my name is: $name ");
+
+age = 0
+
+print("My age is:")
+
+input(age)
+
+print("$age Years old")
+
+```
 
 ---
 
