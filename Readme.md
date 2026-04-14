@@ -29,6 +29,29 @@ print("$age Years old")
 
 ---
 
+## Status
+
+The current status of **Erlang** is still work in progress.
+I have alot to implement:
+
+Implemented:
+
+- Tokenizer
+- Lexer
+- Typecaster
+
+Yet to be implemented:
+
+- Parser (Not yet started)
+- Interpreter (Initialized)
+- Arithmetic Handler (Initialized)
+- Functions
+- Control Flow (if-else)
+- Arrays
+- Loops (While and For)
+
+---
+
 ## LICENSE
 
 This project is under GNU General Public License V3. Check LICENSE file for more information.
