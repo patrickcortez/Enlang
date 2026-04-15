@@ -30,9 +30,15 @@ namespace Enlang.Utils
                 {
                     tmp.Add(nstr.ToString()); // store to String List once we encounter any Seperator.
                     nstr.Clear();
+                    continue;
                 }
 
                 nstr.Append(c);
+            }
+
+            if(nstr.Length > 1)
+            {
+                tmp.Add(nstr.ToString());
             }
 
             return tmp.ToArray();

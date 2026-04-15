@@ -39,16 +39,25 @@ Implemented:
 - Tokenizer
 - Lexer
 - Typecaster
+- Parser
+- Interpreter
+- Arithmetic
 
 Yet to be implemented:
-
-- Parser (Not yet started)
-- Interpreter (Initialized)
-- Arithmetic Handler (Initialized)
 - Functions
 - Control Flow (if-else)
 - Arrays
 - Loops (While and For)
+
+---
+
+## Screenshots
+
+
+
+![Preview](Assets/Preview1.png)
+
+![Code](Assets/Preview2.png)
 
 ---
 

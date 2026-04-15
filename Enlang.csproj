@@ -8,4 +8,8 @@
     <StartupObject>Enlang.Enlang</StartupObject>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Assets\" />
+  </ItemGroup>
+
 </Project>

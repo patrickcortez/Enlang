@@ -11,9 +11,16 @@ namespace Enlang.Components
         Dictionary<string,object> Variables;
         List<Token> Instructions;
         int index = 0;
+        bool debug;
 
-        public Interpreter(List<Token> instructions)
+        private void Debug(string msg)
         {
+            Console.WriteLine(msg);
+        }
+
+        public Interpreter(List<Token> instructions,bool isdebug = false)
+        {
+            debug = isdebug;
             Instructions = new List<Token>(instructions);
             Variables = new Dictionary<string, object>();
             ReadInstructions();
@@ -21,6 +28,9 @@ namespace Enlang.Components
 
         private void print(string msg,bool isError = false) //handle output
         {
+
+            msg = ReplaceWords(msg, Variables.Keys.ToArray(),Variables,'$');
+
             if (isError)
             {
                 Console.Error.WriteLine($"Error: {msg}");
@@ -33,18 +43,12 @@ namespace Enlang.Components
 
         private object input() // handle input
         {
-           object variable;
+            object variable;
 
 
-            while ((variable = Console.ReadLine()) != null)
-            {
-                    Console.Error.WriteLine("Input Cannot be empty!");
-
-                    continue;
-
-            }
+            variable = Console.ReadLine();    
                
-                return variable;
+            return variable;
 
         }
 
@@ -65,6 +69,7 @@ namespace Enlang.Components
             }
             else // string is our default
             {
+                val = val.TrimStart('"').TrimEnd('"'); // if its a string we automatically remove the qoutes, so its clean.
                 value = val;
 
             }
@@ -75,7 +80,7 @@ namespace Enlang.Components
 
         private void HandleVariable(string line)
         {
-
+           
             string[] words = Tokenize(line, '=');
             string key = words[0];
             object value = new object();
@@ -153,6 +158,15 @@ namespace Enlang.Components
             {
                 HandleVariable(line);
             }
+
+            if(type == Types.Error && debug)
+            {
+                if (line.Length < 1)
+                {
+                    return;
+                }
+                Debug($"Error: {line}");
+            }
         }
 
 
@@ -186,6 +200,11 @@ namespace Enlang.Components
             while (true) // Replaced Foreach with While for better control over the flow
             {
                 Token instruction = current();
+
+                if (debug)
+                {
+                    Debug($"Current Instruction: {instruction.type.ToString()}  , Instruction Line: {instruction.line}");
+                }
 
                 if (instruction.type == Types.End)
                 {

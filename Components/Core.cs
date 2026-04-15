@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System.Data;
+using System.Linq.Expressions;
+using System.Text;
 using static Enlang.Components.Misc.TypeCaster;
 using static Enlang.Utils.Utility;
 
@@ -16,11 +18,12 @@ namespace Enlang.Components
         readonly string filepath;
         List<string> lines;
         List<Token> Instructions;
-        string[] syntax = {"output","input"};
+        string[] syntax = {"print","input"};
+        bool debug;
 
 #nullable disable
 
-        public Core(string src)
+        public Core(string src,bool isDebug = false)
         {
             if (!File.Exists(src)) // if file does not exist 
             {
@@ -34,6 +37,7 @@ namespace Enlang.Components
                 return;
             }
 
+            debug = isDebug;
             filepath = src;
             Instructions = new List<Token>();
             Lex();
@@ -64,68 +68,104 @@ namespace Enlang.Components
             return false; //place holder will implement tomorrow
         }
 
-        
+        private void Debug(string msg)
+        {
+            Console.WriteLine(msg);
+        }
 
         private void Lex() // Lexing File contents line by line.
         {
-
-            using (StreamReader sr = new StreamReader(filepath)) 
+            try
             {
-                string line;
-                while((line = sr.ReadLine()) != null)
+                using (StreamReader sr = new StreamReader(filepath))
                 {
-
-                    if (string.IsNullOrWhiteSpace(line)) // skip every newlines
+                    string line;
+                    while ((line = sr.ReadLine()) != null)
                     {
-                        continue;
-                    }
 
-                    string current = string.Empty;
-                    string[] words = Tokenize(line,'='); // We tokenize the entire line before evaluating
-                    
-
-                    if (words.Length < 2) // if the length of words is less than 2, its always an instruction
-                    { 
-
-                        
-
-                        if (isSyntax(words[0],ref current, '('))
+                        if (debug)
                         {
-                            string instruction = words[0].Remove(words[0].IndexOf('('), words.Length - current.Length); // print("Hello") : print -> 5, ("hello") - 9 over all its 14 - 5
-                            string data = words[0].Remove(0, current.Length);
-                            
-                            if (instruction == "print") // if its a print token
+                            Debug($"Current Line: {line}");
+                        }
+
+                        if (string.IsNullOrWhiteSpace(line)) // skip every newlines
+                        {
+                            continue;
+                        }
+
+                        string current = string.Empty;
+                        string[] words = Tokenize(line, '='); // We tokenize the entire line before evaluating
+
+
+                        if (words.Length < 2) // if the length of words is less than 2, its always an instruction
+                        {
+
+                            if (debug)
                             {
-                                Instructions.Add(new Token(Types.Print,data)); // (message)
-                            }else if(instruction == "ïnput") // otherise if its an input
-                            {
-                                Instructions.Add(new Token(Types.Input,data)); // (variable_name)
+                                Debug($"Current Line: {words[0]}");
                             }
 
+                            if (isSyntax(words[0], ref current, '(')) // bug, somewhere in this line
+                            {
+                                string instruction = words[0].Remove(words[0].IndexOf('('), words[0].Length - current.Length); // print("Hello") : print -> 5, ("hello") - 9 over all its 14 - 5
+                                string data = words[0].Remove(0, current.Length);
+                                data = data.TrimStart('(').TrimEnd(')');
+                                data = data.TrimStart('"').TrimEnd('"');
+
+                                if (debug)
+                                {
+                                    Debug($"Current instruction: {instruction} , Current data: {data}");
+                                }
+
+                                if (instruction == "print") // if its a print token
+                                {
+                                    Instructions.Add(new Token(Types.Print, data)); // (message)
+                                }
+                                else if (instruction == "input") // otherise if its an input
+                                {
+                                    Instructions.Add(new Token(Types.Input, data)); // (variable_name)
+                                }
+
+                            }
+                            else // if its not a syntax/instruction we store it as an error.
+                            {
+
+                                Instructions.Add(new Token(Types.Error, words[0]));
+
+                            }
                         }
-                        else // if its not a syntax/instruction we store it as an error.
+                        else
                         {
+                            // key and value for variable
 
-                            Instructions.Add(new Token(Types.Error,words[0]));
-
+                            Instructions.Add(new Token(Types.Variable, line)); // (Variable_Name,Value)
                         }
-                    }
-                    else
-                    {
-                        // key and value for variable
 
-                        Instructions.Add(new Token(Types.Variable, string.Join('=',words))); // (Variable_Name,Value)
+                        if (debug)
+                        {
+                            Debug($"Current Lines: {line}");
+                        }
+
                     }
+
+                    Instructions.Add(new Token(Types.End, "null")); // signifies an end of a program
+
                 }
-
-                Instructions.Add(new Token(Types.End, "null")); // signifies an end of a program
-            
+            }catch(Exception ex)
+            {
+                Console.Error.WriteLine(ex.Message);
+                Environment.Exit(1);
             }
         }
 
         internal void BeginInterpret()
         {
-            Interpreter interpret = new Interpreter(Instructions);
+            if (debug)
+            {
+                Debug("Interpretting Began!");
+            }
+
+            Interpreter interpret = new Interpreter(Instructions,debug);
         }
     }
 }
