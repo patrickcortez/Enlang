@@ -69,9 +69,20 @@ namespace Enlang.Components
             return false; //place holder will implement tomorrow
         }
 
-        private void Debug(string msg)
+        private void Debug(string msg,bool isError = false)
         {
-            Console.WriteLine(msg);
+
+            if (isError)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($">{msg}");
+                Console.ResetColor();
+                return;
+            }
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine($"> {msg}");
+            Console.ResetColor();
         }
 
         private void Lex() // Lexing File contents line by line.

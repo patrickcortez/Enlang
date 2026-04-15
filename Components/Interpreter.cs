@@ -13,9 +13,20 @@ namespace Enlang.Components
         int index = 0;
         bool debug;
 
-        private void Debug(string msg)
+        private void Debug(string msg,bool isError = false)
         {
-            Console.WriteLine(msg);
+
+            if (isError)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($">{msg}");
+                Console.ResetColor();
+                return;
+            }
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine($">{msg}");
+            Console.ResetColor();
         }
 
         public Interpreter(List<Token> instructions,bool isdebug = false)
