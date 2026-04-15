@@ -1,0 +1,25 @@
+﻿# This is a comment
+
+name="Patrick"
+
+print("Reenter name:")
+input(name)
+
+if(name == "Patrick"){ # If block
+# Code block
+
+print("Hey Master $name")
+
+
+# End of Code block
+}elif(name == "Anthony"){ # Elif or Else if Block
+
+print("Hey $name!")
+
+}else{ # Else block
+
+print("Who are you?")
+
+}
+
+print("if else test done!");

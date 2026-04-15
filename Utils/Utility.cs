@@ -36,7 +36,7 @@ namespace Enlang.Utils
                 nstr.Append(c);
             }
 
-            if(nstr.Length > 1)
+            if(nstr.Length > 0)
             {
                 tmp.Add(nstr.ToString());
             }

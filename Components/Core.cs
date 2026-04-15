@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using System.Text;
 using static Enlang.Components.Misc.TypeCaster;
 using static Enlang.Utils.Utility;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 /*
  * Syntaxes:
@@ -100,11 +101,6 @@ namespace Enlang.Components
                         if (words.Length < 2) // if the length of words is less than 2, its always an instruction
                         {
 
-                            if (debug)
-                            {
-                                Debug($"Current Line: {words[0]}");
-                            }
-
                             if (isSyntax(words[0], ref current, '(')) // bug, somewhere in this line
                             {
                                 string instruction = words[0].Remove(words[0].IndexOf('('), words[0].Length - current.Length); // print("Hello") : print -> 5, ("hello") - 9 over all its 14 - 5
@@ -129,21 +125,24 @@ namespace Enlang.Components
                             }
                             else // if its not a syntax/instruction we store it as an error.
                             {
+                                if (debug)
+                                {
+                                    Debug($"Unknown Line: {line}");
+                                }
 
-                                Instructions.Add(new Token(Types.Error, words[0]));
+                                Instructions.Add(new Token(Types.Error,line));
 
                             }
                         }
                         else
                         {
                             // key and value for variable
+                            if (debug)
+                            {
+                                Debug($"Current Variable: {line}");
+                            }
 
                             Instructions.Add(new Token(Types.Variable, line)); // (Variable_Name,Value)
-                        }
-
-                        if (debug)
-                        {
-                            Debug($"Current Lines: {line}");
                         }
 
                     }

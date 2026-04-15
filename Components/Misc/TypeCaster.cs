@@ -39,7 +39,7 @@
             {
                 type = "Boolean";
             }
-            else if(type != "Integer" || type != "float" || type != "Boolean")
+            else if(type != "Integer" && type != "float" && type != "Boolean")
             {
                 type = "String";
             }

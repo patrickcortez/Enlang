@@ -77,73 +77,153 @@ namespace Enlang.Components
             return value;
         }
 
+        private bool HasVariables(string data)
+        {
+            if (debug)
+            {
+                Debug($"Current Value in inspection: {data}");
+            }
+
+            foreach(string key in Variables.Keys)
+            {
+                if (data.Contains(key))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
 
         private void HandleVariable(string line)
         {
-           
-            string[] words = Tokenize(line, '=');
-            string key = words[0];
-            object value = new object();
-            string dtype = DetermineDataType(words[1]);
-
-            if (!Arithmetic.isArithmetic(words[1])) // if the line is not Arithmetic then we simply store the variable name and its value
+            try
             {
-                if (!Variables.ContainsKey(key))
+                string[] words = Tokenize(line, '=');
+                string key = words[0].Trim();
+                object value = new object();
+                string dtype = DetermineDataType(words[1]);
+
+                if (debug)
                 {
-
-                    if (!Variables.ContainsKey(words[1]))
-                    {
-                        value = ConvertValue(value, dtype, words[1]);
-
-                        Variables.Add(key, value); // add the new variable in the
-                    }
-                    else
-                    {
-                        value = Variables[words[1]];
-
-                        Variables.Add(key, value);
-                    }
-                }
-                else //if Variable already exists
-                {
-
-                    if (!Variables.ContainsKey(words[1]))
-                    {
-                        value = ConvertValue(value, dtype, words[1]);
-
-                        Variables[key] = value; // change the current variables value to the new one.
-                    }
-                    else
-                    {
-                        value = Variables[words[1]];
-                        Variables[key] = value;
-                    }
-                }
-            }
-            else
-            {
-                string tmp = words[1].Trim();
-                if (Variables.Count > 0) // if variable count is greater than 0 then we start replacing variables in the expression.
-                {
-                    tmp = ReplaceWords(words[1], Variables.Keys.ToArray(), Variables, '$').Trim();
+                    Debug($"Current Variable Name: {words[0]} , Value: {words[1]}");
                 }
 
-                if (!Variables.ContainsKey(key)) // if the variable already exists replace their value.
+                if (!Arithmetic.isArithmetic(words[1]) && !HasVariables(words[1])) // if the line is not Arithmetic then we simply store the variable name and its value
                 {
-                    Arithmetic arith = new Arithmetic(words[1]);
-                    Variables.Add(key, arith.Begin());
+                    if (!Variables.ContainsKey(key))
+                    {
+
+                        if (!Variables.ContainsKey(words[1]))
+                        {
+                            value = ConvertValue(value, dtype, words[1]);
+
+                            Variables.Add(key, value); // add the new variable in the
+
+                            if (debug)
+                            {
+                                Debug($"New Variable name: {key} , Value: {Variables[key]} , Data-type: {dtype}");
+                            }
+                        }
+                        else
+                        {
+                            value = Variables[words[1]];
+
+                            Variables.Add(key, value);
+
+                            if (debug)
+                            {
+                                Debug($"Variable name: {key} , Value: {Variables[key]} , Data-type: {dtype}");
+                            }
+                        }
+                    }
+                    else //if Variable already exists
+                    {
+
+                        if (!Variables.ContainsKey(words[1]))
+                        {
+                            value = ConvertValue(value, dtype, words[1]);
+
+                            Variables[key] = value; // change the current variables value to the new one.
+
+                            if (debug)
+                            {
+                                Debug($"Existing Variable name: {key} , Value: {Variables[key]} , Data-type: {dtype}");
+                            }
+                        }
+                        else
+                        {
+                            value = Variables[words[1]];
+                            Variables[key] = value;
+
+                            if (debug)
+                            {
+                                Debug($"Existing Variable name: {key} , Value: {Variables[key]} , Data-type: {dtype}");
+                            }
+                        }
+                    }
                 }
                 else
                 {
-                    Arithmetic arith = new Arithmetic(words[1]);
-                    Variables[key] = arith.Begin();
+
+                    string tmp = words[1].Trim();
+                    if (Variables.Count > 0) // if variable count is greater than 0 then we start replacing variables in the expression.
+                    {
+                        tmp = ReplaceWords(words[1], Variables.Keys.ToArray(), Variables, '$').Replace(" ","");
+                    }
+
+                    if (debug)
+                    {
+                        Debug($"Current Arithmetic: {tmp} , Key: {key} , Current Value of Key: {Variables[key]}");
+                    }
+
+                    // the out of index exception is somewhere in here
+                    if (!Variables.ContainsKey(key)) // if it doesnt exist then we add it to our Variable Table
+                    {
+
+
+                        if (debug)
+                        {
+                            Debug($"New Variable name:{key}");
+                        }
+
+                        Arithmetic arith = new Arithmetic(tmp);
+                        Variables.Add(key, arith.Begin());
+
+                        
+                    }
+                    else  // if the variable already exists replace their value.
+                    {
+
+                        if (debug)
+                        {
+                            Debug($"Variable name: {key} , Value: {value} , Data-type: {dtype}");
+                        }
+
+                        Arithmetic arith = new Arithmetic(tmp);
+                        Variables[key] = arith.Begin();
+
+                    }
+
+                    //Some where in this region is the cause of the out of index exception
+                    // I've been looking at this for 20 minutes now, i dosnt make 
                 }
+            }catch(IndexOutOfRangeException ex)
+            {
+                Console.Error.WriteLine(ex.Message);
             }
         }
 
 
         private void Execute(Types type,string line) // Execute instructions
         {
+
+            if (debug)
+            {
+                Debug($"Current Instruction: {type}");
+            }
+
             if(type == Types.Print)
             {
                 print(line);

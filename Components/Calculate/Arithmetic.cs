@@ -66,6 +66,10 @@ namespace Enlang.Components.Calculate
                 }
                 else if (Current() == '*')
                 {
+                    tokens.Add(new MathToken(MathTypes.Multiply));
+                    Advance();
+                }else  if(Current() == '/')
+                {
                     tokens.Add(new MathToken(MathTypes.Divide));
                     Advance();
                 }
@@ -92,7 +96,7 @@ namespace Enlang.Components.Calculate
 
         public static bool isArithmetic(string expression)
         {
-            bool isArith = true;
+            bool isArith = false;
             char[] operators = { '-', '+', '*', '/' };
 
             foreach (char c in expression)
@@ -100,13 +104,12 @@ namespace Enlang.Components.Calculate
 
                 if (char.IsLetter(c))
                 {
-                    isArith = false;
                     break;
                 }
 
-                if (!operators.Contains(c) && expression.IndexOf(c) > 0) // incase the expression is just a negative number.
+                if (operators.Contains(c) && expression.IndexOf(c) > 0) // incase the expression is just a negative number.
                 {
-                    isArith = false;
+                    isArith = true;
                     break;
                 }
 
