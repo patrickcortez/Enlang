@@ -1,5 +1,7 @@
 ﻿# Enlang
 
+![Badge1](https://img.shields.io/badge/Enlang-Interpeter-blue) ![Badge2](https://img.shields.io/badge/Csharp-blue)
+
 **Enlang** is a interpreted programming language made in C# with the sole aim of education.
 This software is not meant to replace industry standard programming languages but rather
 its purely for educational attainment on how interpreters work.
@@ -52,7 +54,6 @@ Yet to be implemented:
 ---
 
 ## Screenshots
-
 
 
 ![Preview](Assets/Preview1.png)
