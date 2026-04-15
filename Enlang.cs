@@ -26,6 +26,7 @@ public class Enlang // this class acts as a entry point to the interpreter and a
             ------------------------------------
             ls : Lists all files and directories in pwd
             cd : Changes Directory
+            clear : Clears Screen
             exit : Exits interactive mode
 
         ";
@@ -78,6 +79,11 @@ public class Enlang // this class acts as a entry point to the interpreter and a
         }
     }
 
+    private static void ClearScreen()
+    {
+        Console.Clear();
+    }
+
     private static void RunInteractive() // Enlang Interactive Shell for user convenience
     {
         string input = string.Empty;
@@ -88,7 +94,7 @@ public class Enlang // this class acts as a entry point to the interpreter and a
         {
             Console.ResetColor();
             Console.Write($"[{currentDir.FullName}@Enlang]:"); input = Console.ReadLine(); // user prompt
-            Environment.ExpandEnvironmentVariables(input); // expand any environement variables just incase
+            input = Environment.ExpandEnvironmentVariables(input); // expand any environement variables just incase
 
             string[] args = input.Split(' ');
 
@@ -131,6 +137,9 @@ public class Enlang // this class acts as a entry point to the interpreter and a
             }else if (args[0] == "cd") //basic navigation.
             {
                 ChangeDirectory(args[1]);
+            }else if (args[0] == "clear")
+            {
+                ClearScreen();
             }
             else
             {
