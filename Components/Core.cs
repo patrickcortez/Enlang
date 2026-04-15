@@ -75,7 +75,7 @@ namespace Enlang.Components
             if (isError)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($">{msg}");
+                Console.WriteLine($"Lexer Error> {msg}");
                 Console.ResetColor();
                 return;
             }

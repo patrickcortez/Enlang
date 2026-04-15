@@ -19,9 +19,26 @@ namespace Enlang.Components.Calculate
             }
         }
 
+        private void Debug(string msg, bool isError = false)
+        {
+
+            if (isError)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"Arithmetic Error> {msg}");
+                Console.ResetColor();
+                return;
+            }
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine($">{msg}");
+            Console.ResetColor();
+        }
+
         // Control flow
         private char Current()
         {
+            if (position >= line.Length) return '\0';
             return line[position];
         }
 
@@ -32,6 +49,7 @@ namespace Enlang.Components.Calculate
                 position++;
             }
         }
+
 
         private float ReadNumbers() // Read all numbers in the line until we reach a math operator
         {
@@ -47,50 +65,57 @@ namespace Enlang.Components.Calculate
 
         private void Evaluate()
         {
-            while (position < line.Length)
+            try
             {
-                if (char.IsDigit(Current()))
+                while (position < line.Length)
                 {
-                    tokens.Add(new MathToken(MathTypes.Number, ReadNumbers()));
-                    Advance();
+                    if (char.IsDigit(Current()))
+                    {
+                        tokens.Add(new MathToken(MathTypes.Number, ReadNumbers()));
+                    }
+                    else if (Current() == '+')
+                    {
+                        tokens.Add(new MathToken(MathTypes.Plus));
+                        Advance();
+                    }
+                    else if (Current() == '-')
+                    {
+                        tokens.Add(new MathToken(MathTypes.Minus));
+                        Advance();
+                    }
+                    else if (Current() == '*')
+                    {
+                        tokens.Add(new MathToken(MathTypes.Multiply));
+                        Advance();
+                    }
+                    else if (Current() == '/')
+                    {
+                        tokens.Add(new MathToken(MathTypes.Divide));
+                        Advance();
+                    }
+                    else if (Current() == '(')
+                    {
+                        tokens.Add(new MathToken(MathTypes.Lpar));
+                        Advance();
+                    }
+                    else if (Current() == ')')
+                    {
+                        tokens.Add(new MathToken(MathTypes.Rpar));
+                        Advance();
+                    }
+                    else if (Current() == '^')
+                    {
+                        tokens.Add(new MathToken(MathTypes.Power));
+                        Advance();
+                    }
                 }
-                else if (Current() == '+')
-                {
-                    tokens.Add(new MathToken(MathTypes.Plus));
-                    Advance();
-                }
-                else if (Current() == '-')
-                {
-                    tokens.Add(new MathToken(MathTypes.Minus));
-                    Advance();
-                }
-                else if (Current() == '*')
-                {
-                    tokens.Add(new MathToken(MathTypes.Multiply));
-                    Advance();
-                }else  if(Current() == '/')
-                {
-                    tokens.Add(new MathToken(MathTypes.Divide));
-                    Advance();
-                }
-                else if (Current() == '(')
-                {
-                    tokens.Add(new MathToken(MathTypes.Lpar));
-                    Advance();
-                }
-                else if (Current() == ')')
-                {
-                    tokens.Add(new MathToken(MathTypes.Rpar));
-                    Advance();
-                }else if(Current() == '^')
-                {
-                    tokens.Add(new MathToken(MathTypes.Power));
-                    Advance();
-                }
-            }
 
-            position = 0;
-            tokens.Add(new MathToken(MathTypes.End));
+                position = 0;
+                tokens.Add(new MathToken(MathTypes.End));
+            }catch(Exception ex)
+            {
+                Debug(ex.Message, true);
+            }
         }
 
 

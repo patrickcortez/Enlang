@@ -19,13 +19,13 @@ namespace Enlang.Components
             if (isError)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($">{msg}");
+                Console.WriteLine($"Interpreter Error> {msg}");
                 Console.ResetColor();
                 return;
             }
 
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($">{msg}");
+            Console.WriteLine($"> {msg}");
             Console.ResetColor();
         }
 
@@ -186,10 +186,10 @@ namespace Enlang.Components
 
                     if (debug)
                     {
-                        Debug($"Current Arithmetic: {tmp} , Key: {key} , Current Value of Key: {Variables[key]}");
+                        Debug($"Current Arithmetic: {tmp} , Key: {key}");
                     }
 
-                    // the out of index exception is somewhere in here
+                    
                     if (!Variables.ContainsKey(key)) // if it doesnt exist then we add it to our Variable Table
                     {
 
@@ -206,10 +206,9 @@ namespace Enlang.Components
                     }
                     else  // if the variable already exists replace their value.
                     {
-
                         if (debug)
                         {
-                            Debug($"Variable name: {key} , Value: {value} , Data-type: {dtype}");
+                            Debug($"Variable name: {key} , Value: {tmp} , Data-type: {dtype}");
                         }
 
                         Arithmetic arith = new Arithmetic(tmp);
@@ -217,12 +216,10 @@ namespace Enlang.Components
 
                     }
 
-                    //Some where in this region is the cause of the out of index exception
-                    // I've been looking at this for 20 minutes now, i dosnt make 
                 }
-            }catch(IndexOutOfRangeException ex)
+            }catch(Exception ex)
             {
-                Console.Error.WriteLine(ex.Message);
+                Debug(ex.Message,true);
             }
         }
 
