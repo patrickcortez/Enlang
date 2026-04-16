@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Data;
+using System.Text;
 using static Enlang.Utils.Utility;
 
 /*
@@ -14,6 +15,7 @@ namespace Enlang.Components
     {
         readonly string filepath;
         List<string> lines;
+        List<string> BlockBuffer;
         List<Token> Instructions;
         bool debug;
 
@@ -86,7 +88,9 @@ namespace Enlang.Components
             {
                 using (StreamReader sr = new StreamReader(filepath))
                 {
-                    string line;
+                    string line,prevCondition = string.Empty;
+                    Types previous = new Types();
+                    bool IFBlock = false;
                     while ((line = sr.ReadLine()) != null)
                     {
 
@@ -100,9 +104,23 @@ namespace Enlang.Components
                             continue;
                         }
 
-                        if (line.StartsWith('#')) //we ignore comments
+                        if (line.Trim().StartsWith('#')) //we ignore comments
                         {
                             continue;
+                        }
+
+                        if (line.Trim().StartsWith('{') && (previous == Types.If || previous == Types.Elif || previous == Types.Else))
+                        {
+                            IFBlock = true;
+                            continue;
+                        }
+
+                        if(line.Trim().StartsWith('}') && IFBlock == true)
+                        {
+                            Instructions.Add(new Token(previous,prevCondition,"",BlockBuffer));
+                            prevCondition = string.Empty;
+                            BlockBuffer.Clear();
+                            IFBlock = false;
                         }
 
                         string current = string.Empty;
@@ -117,7 +135,12 @@ namespace Enlang.Components
                                 string instruction = words[0].Remove(words[0].IndexOf('('), words[0].Length - current.Length); // print("Hello") : print -> 5, ("hello") - 9 over all its 14 - 5
                                 string data = words[0].Remove(0, current.Length);
                                 data = data.TrimStart('(').TrimEnd(')');
-                                data = data.TrimStart('"').TrimEnd('"');
+                                if (data.StartsWith('"'))
+                                {
+                                    data = data.TrimStart('"').TrimEnd('"');
+                                }
+                                
+                                
 
                                 if (debug)
                                 {
@@ -126,19 +149,75 @@ namespace Enlang.Components
 
                                 if (instruction == "print") // if its a print token
                                 {
+                                    if (IFBlock)
+                                    {
+                                        BlockBuffer.Add(line);
+                                        continue;
+                                    }
                                     Instructions.Add(new Token(Types.Print, data)); // (message)
+                                   
                                 }
                                 else if (instruction == "input") // otherise if its an input
                                 {
+                                    if (IFBlock)
+                                    {
+                                        BlockBuffer.Add(line);
+                                        continue;
+                                    }
                                     Instructions.Add(new Token(Types.Input, data)); // (variable_name)
+                                    
                                 }
+                                else if(instruction == "if") // control flow
+                                {
 
+                                    if (IFBlock) // well store an nested if for now
+                                    {
+                                        BlockBuffer.Add(line);
+                                        continue;
+                                    }
+
+                                    data = data.Trim();
+                                    prevCondition = data;
+                                    IFBlock = true;
+                                    previous = Types.If;
+                                    continue;
+                                }else if(instruction == "elif") // else if
+                                {
+                                    if (IFBlock) // well store an nested if for now
+                                    {
+                                        BlockBuffer.Add(line);
+                                        continue;
+                                    }
+
+                                    data = data.Trim();
+                                    prevCondition = data;
+                                    IFBlock = true;
+                                    previous = Types.Elif;
+                                    continue;
+                                }else if(instruction == "else") // else
+                                {
+                                    if (IFBlock) // well store an nested if for now
+                                    {
+                                        BlockBuffer.Add(line);
+                                        continue;
+                                    }
+                                    IFBlock = true;
+                                    previous = Types.Else;
+                                    continue;
+                                }
+                                
                             }
                             else // if its not a syntax/instruction we store it as an error.
                             {
                                 if (debug)
                                 {
                                     Debug($"Unknown Line: {line}");
+                                }
+
+                                if (IFBlock)
+                                {
+                                    BlockBuffer.Add(line);
+                                    continue;
                                 }
 
                                 Instructions.Add(new Token(Types.Error,line));
@@ -153,9 +232,16 @@ namespace Enlang.Components
                                 Debug($"Current Variable: {line}");
                             }
 
+                            if (IFBlock)
+                            {
+                                BlockBuffer.Add(line);
+                                continue;
+                            }
+
                             Instructions.Add(new Token(Types.Variable, line)); // (Variable_Name,Value)
                         }
 
+                        
                     }
 
                     Instructions.Add(new Token(Types.End, "null")); // signifies an end of a program

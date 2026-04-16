@@ -53,10 +53,9 @@
         public readonly Types type ;
         public string line;
         public List<string> BlockBuffer; // Functions, Loops and Control Flow Container
-        public List<string> Conditions; // loops and if else
         public readonly Condition condition; // if the current token is a condition if(<condition>)
 
-        public Token(Types tokentype, string ln, string Error = "", List<string>? TmpBlockBuffer = null,Condition cond = Condition.None) // Token type: Print, Input or Variable. 
+        public Token(Types tokentype, string ln, string Error = "", List<string>? TmpBlockBuffer = null) // Token type: Print, Input or Variable. 
         {
 
 
@@ -70,7 +69,6 @@
                 line = Error;
             }else if(tokentype == Types.If || tokentype == Types.Elif || tokentype == Types.Else)
             {
-                condition = cond;
                 type = tokentype;
                 BlockBuffer = TmpBlockBuffer;
             }
