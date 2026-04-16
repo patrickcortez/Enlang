@@ -5,7 +5,7 @@ namespace Enlang.Utils
     internal static class Utility
     {
 
-
+        public readonly static string[] syntax = { "print", "input" , "if" , "elif" , "else" };
         public static void Debug(string msg, bool isError = false)
         {
 

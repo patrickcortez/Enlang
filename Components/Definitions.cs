@@ -52,8 +52,8 @@
     {
         public readonly Types type ;
         public string line;
-        public List<string> BlockBuffer;
-        public List<string> Conditions; // for functions, loops and if else
+        public List<string> BlockBuffer; // Functions, Loops and Control Flow Container
+        public List<string> Conditions; // loops and if else
         public readonly Condition condition; // if the current token is a condition if(<condition>)
 
         public Token(Types tokentype, string ln, string Error = "", List<string>? TmpBlockBuffer = null,Condition cond = Condition.None) // Token type: Print, Input or Variable. 

@@ -1,9 +1,5 @@
-﻿using System.Data;
-using System.Linq.Expressions;
-using System.Text;
-using static Enlang.Components.Misc.TypeCaster;
+﻿using System.Text;
 using static Enlang.Utils.Utility;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 /*
  * Syntaxes:
@@ -19,7 +15,6 @@ namespace Enlang.Components
         readonly string filepath;
         List<string> lines;
         List<Token> Instructions;
-        string[] syntax = {"print","input"};
         bool debug;
 
 #nullable disable
@@ -166,6 +161,7 @@ namespace Enlang.Components
                     Instructions.Add(new Token(Types.End, "null")); // signifies an end of a program
 
                 }
+
             }catch(Exception ex)
             {
                 Console.Error.WriteLine(ex.Message);
