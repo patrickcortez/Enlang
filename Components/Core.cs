@@ -105,6 +105,11 @@ namespace Enlang.Components
                             continue;
                         }
 
+                        if (line.StartsWith('#')) //we ignore comments
+                        {
+                            continue;
+                        }
+
                         string current = string.Empty;
                         string[] words = Tokenize(line, '='); // We tokenize the entire line before evaluating
 

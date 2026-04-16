@@ -36,6 +36,15 @@ namespace Enlang.Utils
                     inQoutes = !inQoutes;
                 }
 
+                if (char.IsWhiteSpace(c) && !inQoutes)
+                {
+                    continue;
+                }
+
+                if(c == '#') // halt if we ever encounter a comment
+                {
+                    break;
+                }
 
                 if (inQoutes)
                 {

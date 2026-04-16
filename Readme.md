@@ -6,24 +6,27 @@
 This software is not meant to replace industry standard programming languages but rather
 its purely for educational attainment on how interpreters work. 
 
-**Enlang** for now has 3 basic instructions output, input and variable declaration:
+**Enlang** for now has 4 basic instructions output, comments, input and variable declaration:
 
  - `print("text")` : This outputs "text" to the Console
  - 'input(var)' : This captures the users input and stores it on a variable named *var*
  - `name=value` : This declares a variable.
+ - `#Comments` : For documentation
 
 With these basic instructions, you can write simple programs:
 
 ```Enlang
-name="Patrick"
+# This is a comment
 
-print("Hello my name is: $name ");
+name="Patrick" # This Declares the variable 'name' 
 
-age = 0
+print("Hello my name is: $name "); // prints out what's inside ()
+
+age = 0 # Declares the variable 'age'
 
 print("My age is:")
 
-input(age)
+input(age) #replaces the variable 'age' w/ a new value
 
 print("$age Years old")
 
@@ -58,6 +61,7 @@ Implemented:
 - Parser
 - Interpreter
 - Arithmetic
+- Comments
 
 Yet to be implemented:
 - Functions
