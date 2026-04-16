@@ -5,6 +5,23 @@ namespace Enlang.Utils
     internal static class Utility
     {
 
+
+        public static void Debug(string msg, bool isError = false)
+        {
+
+            if (isError)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"Interpreter Error> {msg}");
+                Console.ResetColor();
+                return;
+            }
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine($"> {msg}");
+            Console.ResetColor();
+        }
+
         public static string[] Tokenize(string data,params char[] seperators)
         {
             List<string> tmp = new List<string>();

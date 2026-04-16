@@ -1,0 +1,12 @@
+name="Patrick"
+
+age=23
+
+print("The Current age of $name is $age")
+
+print("Enter new age:")
+input(age)
+
+age = $age + $age
+
+print("The new age of $name is $age")

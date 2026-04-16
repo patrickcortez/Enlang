@@ -5,8 +5,19 @@
         Print, //Outputing text
         Variable, //Storing data
         Input, // Acquiring user input
+        If, // if block
+        Elif, // else if block
+        Else, //else block
         Error,
         End
+    }
+
+    internal enum Condition
+    {
+        Or, // ||
+        And, // &&
+        Xor, // !|
+        None
     }
 
     internal enum MathTypes // For Aritthmetic
@@ -41,8 +52,11 @@
     {
         public readonly Types type ;
         public string line;
+        public List<string> BlockBuffer;
+        public List<string> Conditions; // for functions, loops and if else
+        public readonly Condition condition; // if the current token is a condition if(<condition>)
 
-        public Token(Types tokentype,string ln,string Error = "") // Token type: Print, Input or Variable. 
+        public Token(Types tokentype, string ln, string Error = "", List<string>? TmpBlockBuffer = null,Condition cond = Condition.None) // Token type: Print, Input or Variable. 
         {
 
 
@@ -54,6 +68,11 @@
             {
                 type = tokentype;
                 line = Error;
+            }else if(tokentype == Types.If || tokentype == Types.Elif || tokentype == Types.Else)
+            {
+                condition = cond;
+                type = tokentype;
+                BlockBuffer = TmpBlockBuffer;
             }
             else // Otherwise we leave it variable uninitialized and just store the tokentype.
             {

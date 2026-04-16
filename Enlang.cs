@@ -1,4 +1,5 @@
 ﻿using Enlang.Components;
+using static Enlang.Utils.Utility;
 
 namespace Enlang;
 
@@ -35,6 +36,13 @@ public class Enlang // this class acts as a entry point to the interpreter and a
 
     internal static void Run(string filepath,bool isdebug=false) // runs all  enl files
     {
+
+        if(Path.GetExtension(filepath) != ".enl")
+        {
+            Debug($"File: {Path.GetFileName(filepath)} is not a .enl file!", true);
+            return;
+        }
+
         Core start = new Core(filepath,isdebug); // initialize our Interpreter core
         start.BeginInterpret();
     }

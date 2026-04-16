@@ -42,6 +42,16 @@ namespace Enlang.Components
 
             msg = ReplaceWords(msg, Variables.Keys.ToArray(),Variables,'$');
 
+            if (Arithmetic.isArithmetic(msg))
+            {
+                if (debug)
+                {
+                    Debug($"Current Arithmetic: {msg}");
+                }
+                Arithmetic arith = new Arithmetic(msg.Trim());
+                msg = arith.Begin().ToString();
+            }
+
             if (isError)
             {
                 Console.Error.WriteLine($"Error: {msg}");
