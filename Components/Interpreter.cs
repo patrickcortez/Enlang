@@ -11,6 +11,7 @@ namespace Enlang.Components
         Dictionary<string,object> Variables;
         List<Token> Instructions;
         int index = 0;
+        bool IFSuccess = false;
         bool debug;
 
         private void Debug(string msg,bool isError = false)
@@ -255,6 +256,25 @@ namespace Enlang.Components
             if(type == Types.Variable)
             {
                 HandleVariable(line);
+            }
+
+            if(type == Types.If)
+            {
+                if (IFSuccess)
+                {
+                    IFSuccess = !IFSuccess; //reset once we hit a new if
+                }
+                // Place Holder
+            }
+
+            if(type == Types.Elif && !IFSuccess)
+            {
+                //Place holder
+            }
+
+            if(type == Types.Else && !IFSuccess)
+            {
+
             }
 
             if(type == Types.Error && debug)
