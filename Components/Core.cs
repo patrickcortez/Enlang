@@ -121,6 +121,7 @@ namespace Enlang.Components
                             prevCondition = string.Empty;
                             BlockBuffer.Clear();
                             IFBlock = false;
+                            continue;
                         }
 
                         string current = string.Empty;
