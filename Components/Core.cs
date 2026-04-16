@@ -136,6 +136,7 @@ namespace Enlang.Components
                                 string instruction = words[0].Remove(words[0].IndexOf('('), words[0].Length - current.Length); // print("Hello") : print -> 5, ("hello") - 9 over all its 14 - 5
                                 string data = words[0].Remove(0, current.Length);
                                 data = data.TrimStart('(').TrimEnd(')');
+                                
                                 if (data.StartsWith('"'))
                                 {
                                     data = data.TrimStart('"').TrimEnd('"');
@@ -182,7 +183,9 @@ namespace Enlang.Components
                                     IFBlock = true;
                                     previous = Types.If;
                                     continue;
-                                }else if(instruction == "elif") // else if
+
+                                }
+                                else if(instruction == "elif") // else if
                                 {
                                     if (IFBlock) // well store an nested if for now
                                     {
@@ -195,7 +198,8 @@ namespace Enlang.Components
                                     IFBlock = true;
                                     previous = Types.Elif;
                                     continue;
-                                }else if(instruction == "else") // else
+                                }
+                                else if(instruction == "else") // else
                                 {
                                     if (IFBlock) // well store an nested if for now
                                     {

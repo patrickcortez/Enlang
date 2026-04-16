@@ -218,7 +218,7 @@ namespace Enlang.Components.Misc
         // If-elif-else Execution
         // Condition Handling
 
-        // I'll Save for now and continue later, Time stamp 4:58  PM
+        // So far i have added the tokenizing of if elif and else in the Core.cs, and its code block, now for the main part, its code block handling, condition parsing and Block execution
 
 
 
