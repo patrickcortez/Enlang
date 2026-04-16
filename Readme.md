@@ -1,6 +1,6 @@
 ﻿# Enlang
 
-![Badge1](https://img.shields.io/badge/Enlang-Interpeter-blue) ![Badge2](https://img.shields.io/badge/Csharp-blue)
+![Badge1](https://img.shields.io/badge/Enlang-Interpeter-blue) ![Badge2](https://img.shields.io/badge/Csharp-blue) ![Version](https://img.shields.io/badge/Version-0.4-blue)
 
 **Enlang** is a interpreted programming language with an interactive shell made in C# with the sole aim of education.
 This software is not meant to replace industry standard programming languages but rather
@@ -65,7 +65,7 @@ Implemented:
 
 Yet to be implemented:
 - Functions
-- Control Flow (if-else)
+- Control Flow (if-elif-else)
 - Arrays
 - Loops (While and For)
 
