@@ -3,6 +3,7 @@ using static Enlang.Components.Misc.TypeCaster;
 using static Enlang.Utils.Utility;
 using Enlang.Components.Calculate;
 using System.Text;
+using Enlang.Components.Misc;
 
 namespace Enlang.Components
 {
@@ -234,8 +235,29 @@ namespace Enlang.Components
             }
         }
 
+        private Dictionary<string,object> HandleBlock(List<string> BlockBuffer) // Handles Block Execution.
+        {
+            Block tmp = new Block(Variables, BlockBuffer.ToArray());
+            return tmp.GetVariables();
+        }
 
-        private void Execute(Types type,string line) // Execute instructions
+        private void HandleCondition(string condition)
+        {
+            Condition[] conds = TokenizeCondition(condition).ToArray(); // && , ||
+
+            if (debug)
+            {
+                Debug($"Current Condition: {condition}");
+            }
+
+            if(conds.Count() < 1)
+            {
+                string expression;
+            }
+        }
+
+
+        private void Execute(Types type,string line,List<string>? BlockBuffer = null) // Execute instructions
         {
 
             if (debug)
@@ -262,9 +284,11 @@ namespace Enlang.Components
             {
                 if (IFSuccess)
                 {
-                    IFSuccess = !IFSuccess; //reset once we hit a new if
+                    IFSuccess = !IFSuccess; 
                 }
-                // Place Holder
+                
+
+
             }
 
             if(type == Types.Elif && !IFSuccess)
@@ -329,7 +353,15 @@ namespace Enlang.Components
                     break;
                 }
 
-                Execute(instruction.type, instruction.line);
+
+                if (instruction.type == Types.If || instruction.type == Types.Elif || instruction.type == Types.Else)
+                {
+                    Execute(instruction.type, instruction.line);
+                }
+                else
+                {
+                    Execute(instruction.type, instruction.line);
+                }
                 AdvanceTo();
 
 

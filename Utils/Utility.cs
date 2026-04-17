@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using Enlang.Components;
+using System.Text;
 
 namespace Enlang.Utils
 {
@@ -20,6 +21,49 @@ namespace Enlang.Utils
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine($"> {msg}");
             Console.ResetColor();
+        }
+
+        public static Condition[] TokenizeCondition(string data,params string[] seperator)
+        {
+            StringBuilder nStr = new StringBuilder();
+            List<Condition> Conditions = new List<Condition>();
+
+            foreach (char c in data)
+            {
+
+                if (seperator.Contains(nStr.ToString()))
+                {
+                    string Ops = nStr.ToString();
+                    if(Ops == "&&")
+                    {
+                        Conditions.Add(Condition.And);
+                        nStr.Clear();
+                        continue;
+                    }else if(Ops == "||")
+                    {
+                        Conditions.Add(Condition.Or);
+                        nStr.Clear();
+                        continue;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+
+                if(c == '&' || c == '|')
+                {
+                    nStr.Append(c);
+                }
+                else
+                {
+                    continue;
+                }
+
+            }
+
+            return Conditions.ToArray();
         }
 
         public static string[] Tokenize(string data,params char[] seperators)

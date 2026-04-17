@@ -1,8 +1,9 @@
 ﻿using Enlang.Components;
+using System.ComponentModel.Design;
+using Terminal.Gui;
 using static Enlang.Utils.Utility;
 
 namespace Enlang;
-
 
 
 // Main Enlang class
@@ -12,7 +13,12 @@ public class Enlang // this class acts as a entry point to the interpreter and a
     private static readonly float enlangver = 1.0F; //Enlang Version
     string[] commands = { "help","run","debug" };
     static DirectoryInfo currentDir = new DirectoryInfo(Environment.CurrentDirectory);
-
+    static readonly string Status = $@"Version: {enlangver},
+                                       Status : W.I.P,
+                                       Develoer: Tezz2026";
+    static int width = Console.WindowWidth;
+    static int height = Console.WindowHeight;
+    static string currentFile = string.Empty;
     internal static void PrintHelp() //for user convenience
     {
         string msg = $@"
@@ -21,6 +27,7 @@ public class Enlang // this class acts as a entry point to the interpreter and a
             run <.enl file> : Runs Enlang Script
             debug <.enl file> : Debugs Enlang Script
             help or --help  : Displays help
+            status : Shows the current status of Enlang
 
             ------------------------------------
             Interactive: 
@@ -32,6 +39,11 @@ public class Enlang // this class acts as a entry point to the interpreter and a
 
         ";
         Console.WriteLine(msg);
+    }
+
+    private static void PrintStatus()
+    {
+        Console.WriteLine(Status);
     }
 
     internal static void Run(string filepath,bool isdebug=false) // runs all  enl files
@@ -87,78 +99,165 @@ public class Enlang // this class acts as a entry point to the interpreter and a
         }
     }
 
+    private static void SetFile(string src)
+    {
+        if (!Path.Exists(src))
+        {
+            Debug($"File: {Path.GetFileName(src)} does not Exist!",true);
+            return;
+        }
+
+        if(Path.GetExtension(src) != ".enl")
+        {
+            Debug($"File: {Path.GetFileName(src)} does not exist!",true);
+            return;
+        }
+
+        currentFile = src;
+    }
+
     private static void ClearScreen()
     {
         Console.Clear();
+        DrawFooter();
+        Console.SetCursorPosition(0, 2);
+
     }
 
     private static void RunInteractive() // Enlang Interactive Shell for user convenience
     {
         string input = string.Empty;
+        ConsoleKey key = new ConsoleKey();
 
         Console.WriteLine($"Welcome to Enlang v{enlangver}! type 'help' to get started\n");
 
+        DrawHeader();
+        DrawFooter();
+        Console.SetCursorPosition(0, 2);
+
         while (true)
         {
-            Console.ResetColor();
-            Console.Write($"[{currentDir.FullName}@Enlang]:"); input = Console.ReadLine(); // user prompt
-            input = Environment.ExpandEnvironmentVariables(input); // expand any environement variables just incase
+            
 
-            string[] args = input.Split(' ');
+                Console.ResetColor();
+                Console.Write($"[{currentDir.FullName}@Enlang]:"); input = Console.ReadLine(); // user prompt
+                input = Environment.ExpandEnvironmentVariables(input); // expand any environement variables just incase
 
-            //evaluator 
-            if (args[0] == "run") // running .enl script
-            {
-                if (Path.IsPathRooted(args[1]))
+                string[] args = input.Split(' ');
+
+                //evaluator 
+                if (args[0] == "run") // running .enl script
                 {
-                    Run(args[1]);
+                    if (Path.IsPathRooted(args[1]))
+                    {
+                        Run(args[1]);
+                    }
+                    else
+                    {
+                        string fpath = Path.Combine(Environment.CurrentDirectory, args[1]);
+                        Run(fpath);
+                    }
+
+                }
+                else if (args[0] == "debug") // running .enl scripts in debug mode
+                {
+                    if (Path.IsPathRooted(args[1]))
+                    {
+                        Run(args[1], true);
+                    }
+                    else
+                    {
+                        string fpath = Path.Combine(Environment.CurrentDirectory, args[1]);
+                        Run(fpath, true);
+                    }
+                }
+                else if (args[0] == "help" || args[0] == "--help")
+                {
+                    PrintHelp();
+                }
+                else if (args[0] == "ls") // list files & directories
+                {
+                    ListFiles();
+                } else if (args[0] == "exit") // exit the interactive shell
+                {
+                    Environment.Exit(0);
+                } else if (args[0] == "cd") //basic navigation.
+                {
+                    ChangeDirectory(args[1]);
+                } else if (args[0] == "clear")
+                {
+                    ClearScreen();
+                } else if (args[0] == "status")
+                {
+                    PrintStatus();
+                } else if (args[0] == "set")
+                {
+
+                    if (Path.IsPathRooted(args[1]))
+                    {
+                        SetFile(args[1]);
+                    }
+                    else
+                    {
+                        args[1] = Path.Combine(currentDir.FullName, args[1]);
+                        SetFile(args[1]);
+                    }
+
+                    
+                }else if (args[0] == "edit")
+                {
+                    Application.Init();
+                    Application.Run(new Interactive());
+                    Application.Shutdown();
                 }
                 else
                 {
-                    string fpath = Path.Combine(Environment.CurrentDirectory, args[1]);
-                    Run(fpath);
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"Command: {args[0]} does not exist!");
                 }
 
-            }
-            else if (args[0] == "debug") // running .enl scripts in debug mode
-            {
-                if (Path.IsPathRooted(args[1]))
-                {
-                    Run(args[1], true);
-                }
-                else
-                {
-                    string fpath = Path.Combine(Environment.CurrentDirectory, args[1]);
-                    Run(fpath, true);
-                }
-            }
-            else if (args[0] == "help" || args[0] == "--help")
-            {
-                PrintHelp();
-            }
-            else if (args[0] == "ls") // list files & directories
-            {
-                ListFiles();
-            }else if (args[0] == "exit") // exit the interactive shell
-            {
-                Environment.Exit(0);
-            }else if (args[0] == "cd") //basic navigation.
-            {
-                ChangeDirectory(args[1]);
-            }else if (args[0] == "clear")
+            if (Console.GetCursorPosition().Top > height - 4)
             {
                 ClearScreen();
             }
-            else
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"Command: {args[0]} does not exist!");
+
+
             }
         }
+
+    private static void Initialize()
+    {
+        Console.Clear();
+        Console.Title = "Enlang Interpreter";
+    }
+    
+
+    private static void DrawHeader()
+    {
+        Console.SetCursorPosition(0, 0);
+        Console.ForegroundColor = ConsoleColor.Blue;
+        Console.WriteLine(new string('-', width));
+        Console.SetCursorPosition((width - "[Enlang Interactive Shell]".Length) / 2, 0);
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.Write("[Enlang Interactive Shell]");
+
+    }
+
+    private static void DrawFooter()
+    {
+        Console.SetCursorPosition(0, height - 1);
+        Console.ForegroundColor = ConsoleColor.Blue;
+        Console.WriteLine(new string('-', width));
+        Console.SetCursorPosition((width - "[By Tezz2026]".Length) / 2, height - 2);
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.Write($"[By Tezz2026]");
     }
 
     public static void Main(string[] args)
     {
+
+        Initialize();
+
         if(args.Length < 1) // print help if there are no arguments
         {
             RunInteractive();
@@ -192,6 +291,9 @@ public class Enlang // this class acts as a entry point to the interpreter and a
         }else if(input == "help")
         {
             PrintHelp();
+        }else if(input == "status")
+        {
+            PrintStatus();
         }
     }
 }
