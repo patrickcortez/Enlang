@@ -43,6 +43,8 @@ with simple linux like commands:
 - ls : list current directory
 - cd : change directory
 - clear : clears screen
+- edit : Opens a TUI Text Editor
+- set : Sets File to use in run and debug
 - exit : exits interactive shell.
 
 ---
@@ -62,6 +64,7 @@ Implemented:
 - Interpreter
 - Arithmetic
 - Comments
+- TUI Text Editor
 
 Yet to be implemented:
 - Functions
