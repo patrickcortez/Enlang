@@ -258,12 +258,6 @@ public class Enlang // this class acts as a entry point to the interpreter and a
                     Console.WriteLine($"Command: {args[0]} does not exist!");
                 }
 
-                if (Console.GetCursorPosition().Top > height - 4)
-                {
-                    ClearScreen();
-                }
-
-
             }
         }
          catch (Exception ex)

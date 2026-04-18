@@ -251,24 +251,51 @@ namespace Enlang.Components
                 Debug($"Current Condition: {condition}");
             }
 
-            if(conds.Count() < 1)
+            if (conds.Count() < 1)
             {
-                string expression = condition.TrimStart('(').TrimEnd(')').Replace(" ","");
-
+                string expression = condition.TrimStart('(').TrimEnd(')').Replace(" ", "");
+                string value1, value2;
                 string[] evals = TokenizeExpression(expression);
                 string currentOps = GetOperation(condition);
+
+
 
                 if (operators.Contains(currentOps))
                 {
 
                     object val1, val2;
                     string dtype1 = DetermineDataType(evals[0]), dtype2 = DetermineDataType(evals[1]);
-                    val1 = ConvertValue(dtype1, evals[0]);
-                    val2 = ConvertValue(dtype2, evals[1]);
+
+
+                    if (HasVariables(condition))
+                    {
+                        if (Variables.ContainsKey(evals[0]))
+                        {
+                            val1 = Variables[evals[0]];
+                        }
+                        else
+                        {
+                            val1 = ConvertValue(dtype1, evals[0]);
+                        }
+
+                        if (Variables.ContainsKey(evals[1]))
+                        {
+                            val2 = Variables[evals[1]];
+                        }
+                        else
+                        {
+                            val2 = ConvertValue(dtype2, evals[1]);
+                        }
+                    }
+                    else
+                    {
+                        val1 = ConvertValue(dtype1, evals[0]);
+                        val2 = ConvertValue(dtype2, evals[1]);
+                    }
 
                     if (currentOps == "==")
                     {
-                        if(val1 == val2)
+                        if (val1 == val2)
                         {
                             IFSuccess = true;
                         }
@@ -277,9 +304,31 @@ namespace Enlang.Components
                             IFSuccess = false;
                         }
                     }
-                }
+                    else if (currentOps == ">")
+                    {
+                        if ((float)val1 > (float)val2)
+                        {
+                            IFSuccess = true;
+                        }
+                        else
+                        {
+                            IFSuccess = false;
+                        }
+                    }
+                    else if (currentOps == "<")
+                    {
+                        if ((float)val1 < (float)val2)
+                        {
+                            IFSuccess = true;
+                        }
+                        else
+                        {
 
-                
+                        }
+                    }
+
+
+                }
             }
         }
 
@@ -309,6 +358,12 @@ namespace Enlang.Components
 
             if(type == Types.If)
             {
+
+                if (debug)
+                {
+                    Debug($"Current If: {line}");
+                }
+
                 if (IFSuccess)
                 {
                     IFSuccess = !IFSuccess;
@@ -325,6 +380,12 @@ namespace Enlang.Components
 
             if(type == Types.Elif && !IFSuccess)
             {
+
+                if (debug)
+                {
+                    Debug($"Current Elif: {line}");
+                }
+
                 HandleCondition(line);
                 if (IFSuccess)
                 {
@@ -334,6 +395,11 @@ namespace Enlang.Components
 
             if(type == Types.Else && !IFSuccess)
             {
+                if (debug)
+                {
+                    Debug($"Current Else: {line}");
+                }
+
                 if (IFSuccess)
                 {
                     Variables = HandleBlock(BlockBuffer);
