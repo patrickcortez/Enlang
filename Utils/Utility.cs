@@ -66,6 +66,56 @@ namespace Enlang.Utils
             return Conditions.ToArray();
         }
 
+        public static string[] TokenizeExpression(string data) // tokenize expression ex: (val==val2)
+        {
+            List<string> Exp = new List<string>();
+            StringBuilder nStr = new StringBuilder();
+
+            foreach(char c in data)
+            {
+                if (!char.IsLetterOrDigit(c))
+                {
+                    if (nStr.Length > 1)
+                    {
+                        Exp.Add(nStr.ToString());
+                        nStr.Clear();
+                    }
+                    continue;
+                }
+                nStr.Append(c);
+               
+            }
+
+            if(nStr.Length > 1)
+            {
+                Exp.Add(nStr.ToString());
+            }
+
+            return Exp.ToArray();
+        }
+
+        public static string GetOperation(string data)
+        {
+            StringBuilder nStr = new StringBuilder();
+
+            foreach(char c in data)
+            {
+                if (char.IsLetterOrDigit(c))
+                {
+                    continue;
+                }
+
+                if (char.IsWhiteSpace(c))
+                {
+                    continue;
+                }
+
+                nStr.Append(c);
+            }
+
+            return nStr.ToString();
+        }
+
         public static string[] Tokenize(string data,params char[] seperators)
         {
             List<string> tmp = new List<string>();

@@ -11,6 +11,7 @@ namespace Enlang.Components
     {
         Dictionary<string,object> Variables;
         List<Token> Instructions;
+        string[] operators = { "==", ">", "<", ">=", "<=" };
         int index = 0;
         bool IFSuccess = false;
         bool debug;
@@ -75,9 +76,9 @@ namespace Enlang.Components
 
         }
 
-        private object ConvertValue(object value, string dtype, string val) // Convert Value to its data type
+        private object ConvertValue(string dtype, string val) // Convert Value to its data type
         {
-
+            object value;
             if (dtype == "Integer") // int
             {
                 value = int.Parse(val);
@@ -140,7 +141,7 @@ namespace Enlang.Components
 
                         if (!Variables.ContainsKey(words[1]))
                         {
-                            value = ConvertValue(value, dtype, words[1]);
+                            value = ConvertValue(dtype, words[1]);
 
                             Variables.Add(key, value); // add the new variable in the
 
@@ -166,7 +167,7 @@ namespace Enlang.Components
 
                         if (!Variables.ContainsKey(words[1]))
                         {
-                            value = ConvertValue(value, dtype, words[1]);
+                            value = ConvertValue(dtype, words[1]);
 
                             Variables[key] = value; // change the current variables value to the new one.
 
@@ -252,7 +253,33 @@ namespace Enlang.Components
 
             if(conds.Count() < 1)
             {
-                string expression;
+                string expression = condition.TrimStart('(').TrimEnd(')').Replace(" ","");
+
+                string[] evals = TokenizeExpression(expression);
+                string currentOps = GetOperation(condition);
+
+                if (operators.Contains(currentOps))
+                {
+
+                    object val1, val2;
+                    string dtype1 = DetermineDataType(evals[0]), dtype2 = DetermineDataType(evals[1]);
+                    val1 = ConvertValue(dtype1, evals[0]);
+                    val2 = ConvertValue(dtype2, evals[1]);
+
+                    if (currentOps == "==")
+                    {
+                        if(val1 == val2)
+                        {
+                            IFSuccess = true;
+                        }
+                        else
+                        {
+                            IFSuccess = false;
+                        }
+                    }
+                }
+
+                
             }
         }
 
@@ -284,21 +311,33 @@ namespace Enlang.Components
             {
                 if (IFSuccess)
                 {
-                    IFSuccess = !IFSuccess; 
+                    IFSuccess = !IFSuccess;
                 }
-                
 
+                HandleCondition(line);
+
+                if (IFSuccess)
+                {
+                    Variables = HandleBlock(BlockBuffer);
+                }
 
             }
 
             if(type == Types.Elif && !IFSuccess)
             {
-                //Place holder
+                HandleCondition(line);
+                if (IFSuccess)
+                {
+                    Variables = HandleBlock(BlockBuffer);
+                }
             }
 
             if(type == Types.Else && !IFSuccess)
             {
-
+                if (IFSuccess)
+                {
+                    Variables = HandleBlock(BlockBuffer);
+                }
             }
 
             if(type == Types.Error && debug)
