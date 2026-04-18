@@ -35,6 +35,7 @@ public class Enlang // this class acts as a entry point to the interpreter and a
             ls : Lists all files and directories in pwd
             cd : Changes Directory
             clear : Clears Screen
+            edit <file> : Opens a TUI Text Editor to edit your files.
             exit : Exits interactive mode
 
         ";
@@ -59,9 +60,25 @@ public class Enlang // this class acts as a entry point to the interpreter and a
         start.BeginInterpret();
     }
 
-    private static void ListFiles()
+    private static void ListFiles(string tar = "")
     {
+        if(tar != string.Empty)
+        {
+            string target = Path.Combine(currentDir.FullName, tar);
+            var listd = Directory.GetDirectories(target);
+            var listf = Directory.GetFiles(target);
+            foreach (var dir in listd)
+            {
+                Console.WriteLine($"[DIR] {Path.GetFileName(dir)}");
+            }
 
+            foreach(string file in listf)
+            {
+                Console.WriteLine($"[File] {Path.GetFileName(file)}");
+            }
+
+            return;
+        }
 
         Console.WriteLine("Files & Directories:");
         foreach(DirectoryInfo dir in currentDir.GetDirectories())
@@ -119,25 +136,27 @@ public class Enlang // this class acts as a entry point to the interpreter and a
     private static void ClearScreen()
     {
         Console.Clear();
-        DrawFooter();
+       // DrawFooter();
         Console.SetCursorPosition(0, 2);
 
     }
 
     private static void RunInteractive() // Enlang Interactive Shell for user convenience
     {
-        string input = string.Empty;
-        ConsoleKey key = new ConsoleKey();
-
-        Console.WriteLine($"Welcome to Enlang v{enlangver}! type 'help' to get started\n");
-
-        DrawHeader();
-        DrawFooter();
-        Console.SetCursorPosition(0, 2);
-
-        while (true)
+        try
         {
-            
+            string input = string.Empty;
+        //    ConsoleKey key = new ConsoleKey();
+
+            Console.WriteLine($"Welcome to Enlang v{enlangver}! type 'help' to get started\n");
+
+            DrawHeader();
+           // DrawFooter();
+            Console.SetCursorPosition(0, 2);
+
+            while (true)
+            {
+
 
                 Console.ResetColor();
                 Console.Write($"[{currentDir.FullName}@Enlang]:"); input = Console.ReadLine(); // user prompt
@@ -177,22 +196,35 @@ public class Enlang // this class acts as a entry point to the interpreter and a
                 }
                 else if (args[0] == "ls") // list files & directories
                 {
-                    ListFiles();
-                } else if (args[0] == "exit") // exit the interactive shell
+                    if(args.Length < 2)
+                    {
+                        ListFiles();
+                    }
+                    else
+                    {
+                        ListFiles(args[1]);
+                    }
+
+
+                }
+                else if (args[0] == "exit") // exit the interactive shell
                 {
                     Environment.Exit(0);
-                } else if (args[0] == "cd") //basic navigation.
+                }
+                else if (args[0] == "cd") //basic navigation.
                 {
                     ChangeDirectory(args[1]);
-                } else if (args[0] == "clear")
+                }
+                else if (args[0] == "clear")
                 {
                     ClearScreen();
-                } else if (args[0] == "status")
+                }
+                else if (args[0] == "status")
                 {
                     PrintStatus();
-                } else if (args[0] == "set")
+                }
+                else if (args[0] == "set")
                 {
-
                     if (Path.IsPathRooted(args[1]))
                     {
                         SetFile(args[1]);
@@ -203,11 +235,21 @@ public class Enlang // this class acts as a entry point to the interpreter and a
                         SetFile(args[1]);
                     }
 
-                    
-                }else if (args[0] == "edit")
+
+                }
+                else if (args[0] == "edit")
                 {
                     Application.Init();
-                    Application.Run(new Interactive());
+                    if (args.Length < 2)
+                    {
+                        Application.Run(new Interactive());
+                    }
+                    else
+                    {
+                        string src = Path.Combine(currentDir.FullName,args[1]);
+                        Application.Run(new Interactive(src));
+                    }
+                    
                     Application.Shutdown();
                 }
                 else
@@ -216,14 +258,19 @@ public class Enlang // this class acts as a entry point to the interpreter and a
                     Console.WriteLine($"Command: {args[0]} does not exist!");
                 }
 
-            if (Console.GetCursorPosition().Top > height - 4)
-            {
-                ClearScreen();
-            }
+                if (Console.GetCursorPosition().Top > height - 4)
+                {
+                    ClearScreen();
+                }
 
 
             }
         }
+         catch (Exception ex)
+        {
+            Debug(ex.Message, true);
+        }
+    }
 
     private static void Initialize()
     {
@@ -243,6 +290,7 @@ public class Enlang // this class acts as a entry point to the interpreter and a
 
     }
 
+    /* Disabling Footers for now, up until I can find a way to implement scrolling
     private static void DrawFooter()
     {
         Console.SetCursorPosition(0, height - 1);
@@ -252,6 +300,7 @@ public class Enlang // this class acts as a entry point to the interpreter and a
         Console.ForegroundColor = ConsoleColor.White;
         Console.Write($"[By Tezz2026]");
     }
+    */
 
     public static void Main(string[] args)
     {

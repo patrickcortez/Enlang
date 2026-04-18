@@ -10,22 +10,69 @@
 namespace Enlang {
     using System.Collections.Immutable;
     using System.Reflection.PortableExecutable;
+    using System.Runtime.CompilerServices;
+    using System.Runtime.InteropServices;
     using Terminal.Gui;
-    
-    
+
+
     public partial class Interactive {
         SaveDialog sd;
         OpenDialog od;
         List<string> lines;
         private string filename { get; set; }
         string[] ftypes = { ".tscl",".enl",".*"};
+        bool changed = false;
 
-        public Interactive() {
+        public Interactive(string src = "") {
             InitializeComponent();
             lines = new List<string>();
             openFileMenuItem.Action += OpenFile;
             saveFileMenuItem.Action += SaveFile;
+            saveAsMenuItem.Action += SaveAs;
             aboutEnlangEditMenuItem.Action += DisplayAbout;
+            tx_inputbox.TextChanged += Edited;
+            this.Closing += c => HandleExit(c);
+
+            if(src != string.Empty || src != "")
+            {
+                filename = src;
+                lb_fname.Text = filename;
+                tx_inputbox.LoadFile(filename);
+            }
+
+        }
+
+        
+
+        private void Edited()
+        {
+            changed = true;
+        }
+
+        private ToplevelClosingEventArgs HandleExit(object c)
+        {
+            ToplevelClosingEventArgs arg = new ToplevelClosingEventArgs(this);
+
+            if (changed)
+            {
+                int choice = MessageBox.Query("Warning","You have some unsaved changes!","Save","SaveAs","Cancel","Exit");
+
+                if(choice == 0)
+                {
+                    SaveFile();
+                }else if(choice == 1)
+                {
+                    SaveAs();
+                }else if(choice == 2)
+                {
+                    arg.Cancel = true;
+                }else if(choice == 3)
+                {
+                    arg.Cancel = false;
+                }
+            }
+            
+            return arg;
         }
 
 
@@ -33,7 +80,7 @@ namespace Enlang {
         private void DisplayAbout()
         {
             string msg = @"
-    Enlang is a Interpreter Programming Langauge
+    Enlang is a Interpretted Programming Langauge
 Made by Patrick Cortez in 2026. This Editor is made
 using the framework 'Terminal.Gui'. Enlang is under 
 GNU GPL v3 license, To Quit this Editor simply 
@@ -48,6 +95,11 @@ GNU GPL v3 license, To Quit this Editor simply
 
                 od.AllowedFileTypes = ftypes;
                 Application.Run(od);
+
+            if (od.Canceled)
+            {
+                return;
+            }
 
                 if (od.FilePath != null)
                 {
@@ -64,9 +116,15 @@ GNU GPL v3 license, To Quit this Editor simply
                 }
         }
 
-        private void SaveFile()
+        private void SaveFile() // Save any changes to the file.
         {
             lines = new List<string>(tx_inputbox.Text.ToString().Split(new[] { "\r\n" , "\r", "\n" },StringSplitOptions.None)).ToList();
+
+            if( filename == null || filename == string.Empty || filename == "None")
+            {
+                MessageBox.Query("Error","No File is in use. Please Save As First","Ok");
+                return;
+            }
 
             using (StreamWriter sw = new StreamWriter(filename,false))
             {
@@ -75,30 +133,56 @@ GNU GPL v3 license, To Quit this Editor simply
                     sw.WriteLine(line);
                 }
             }
-           
+            changed = false;
        }
 
-        private void SaveAs()
+        private void SaveAs() // Save As if the file does not exist
         {
-            sd = new SaveDialog();
-            lines = new List<string>(tx_inputbox.Text.ToString().Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None)).ToList();
-
-            Application.Run(sd);
-            sd.AllowedFileTypes = ftypes;
-
-            filename = sd.FilePath.ToString();
-
-            if (!File.Exists(filename))
+            try
             {
-                File.Create(filename);
+                sd = new SaveDialog();
+
+                sd.CanCreateDirectories = true;
+                sd.Title = "Save File As";
+
+                Application.Run(sd);
+
+                if (sd.Canceled)
+                {
+                    return;
+                }
+
+
+                lines = new List<string>(tx_inputbox.Text.ToString().Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None)).ToList();
+
+
+
+                filename = sd.FilePath.ToString();
+
+
+                if(filename == string.Empty || Directory.Exists(filename))
+                {
+                    MessageBox.Query("Error", "Provide a valid file name!","Ok");
+                    return;
+                }
+
+                if (File.Exists(filename))
+                {
+                   int response =  MessageBox.Query("Warning", "Do you wish to overwrite?", "Yes","No");
+
+                    if(response != 0)
+                    {
+                        return;
+                    }
+                }
+
+                File.WriteAllText(filename, tx_inputbox.Text.ToString()); // Automatically create and write to the file.
+                changed = false;
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Query("Warning","File already exists!","Ok");
-                return;
-                        
+                MessageBox.Query("Error",ex.Message,"Ok");
             }
-            File.WriteAllLines(filename,lines);
         }
 
 
