@@ -1,8 +1,9 @@
-﻿using System.Text;
-using static Enlang.Utils.Utility;
+﻿using Enlang.Components.Calculate;
+using System.Diagnostics;
+using System.Text;
 using static Enlang.Components.Calculate.Arithmetic;
 using static Enlang.Components.Misc.TypeCaster;
-using Enlang.Components.Calculate;
+using static Enlang.Utils.Utility;
 /*
  * if(<Condition>)
  * { # Open
@@ -23,9 +24,11 @@ namespace Enlang.Components.Misc
     internal class Block // code block for Functions, if else and loops
     {
         Dictionary<string, object> _Variables; // main variable map from the interpreter class passed down to this block
+        Dictionary<string, object> LocalVariables; // local variables for the block.
         private List<Token> Instructions; // The blocks own list of Instruction Defined between its braces
         bool _Condition; // if blocks condition has been set to true, also an indicator if the block has successfully executed
         string[] CodeBlock; // Storage of the strings before its parsed as Tokens.
+        bool debug;
 
         private bool isSyntax(string word, ref string current, char terminator) // Syntax Checker
         {
@@ -52,14 +55,52 @@ namespace Enlang.Components.Misc
             return false; //place holder will implement tomorrow
         }
 
-        public Block(Dictionary<string ,object> variables,string[] block,bool isTrue = false) //pass over variables.
+        private void print(string msg, bool isError = false) //handle output
+        {
+
+            msg = ReplaceWords(msg, _Variables.Keys.ToArray(), _Variables, '$');
+
+            if (Arithmetic.isArithmetic(msg))
+            {
+                if (debug)
+                {
+                    Debug($"Current Arithmetic: {msg}");
+                }
+                Arithmetic arith = new Arithmetic(msg.Trim());
+                msg = arith.Begin().ToString();
+            }
+
+            if (isError)
+            {
+                Console.Error.WriteLine($"Error: {msg}");
+            }
+            else
+            {
+                Console.WriteLine(msg);
+            }
+        }
+
+        private object input() // handle input
+        {
+            object variable;
+
+
+            variable = Console.ReadLine();
+
+            return variable;
+
+        }
+
+        public Block(Dictionary<string ,object> variables,string[] block,bool isTrue = false,bool isDebug = false) //pass over variables.
         {
             _Variables = new Dictionary<string, object>(variables); // Variable table from original;
             CodeBlock = block;
             _Condition = isTrue; // _Condition is always fault by default.
+            debug = isDebug;
             if (isTrue)
             {
                 ReadBlock();
+                ExecuteBlock();
             }
             else
             {
@@ -72,9 +113,9 @@ namespace Enlang.Components.Misc
             return _Condition;
         }
 
-        private object ConvertValue(object value, string dtype, string val) // Convert Value to its data type
+        private object ConvertValue(string dtype, string val) // Convert Value to its data type
         {
-
+            object value;
             if (dtype == "Integer") // int
             {
                 value = int.Parse(val);
@@ -95,6 +136,45 @@ namespace Enlang.Components.Misc
             }
 
             return value;
+        }
+
+        private void ExecuteBlock()
+        {
+            foreach(Token tok in Instructions)
+            {
+                if(tok.type == Types.Print)
+                {
+                    print(tok.line);
+                }else if(tok.type == Types.Input)
+                {
+                    if (_Variables.ContainsKey(tok.line))
+                    {
+                        _Variables[tok.line] = input();
+                    }
+                    else
+                    {
+                        Debug($"Variable: {tok.line} does not exist!",true);
+                        continue;
+                    }
+                }else if(tok.type == Types.Variable) // if current token is variable
+                {
+                    string[] var = Tokenize(tok.line, '=');
+                    string key = var[0].Trim(),value=var[1];
+                    string dtype = DetermineDataType(value);
+
+                    if (_Variables.ContainsKey(key))
+                    {
+                        if (_Variables.ContainsKey(value))
+                        {
+                            _Variables[key] = _Variables[value];
+                        }
+                        else
+                        {
+                            _Variables[key] = ConvertValue(dtype,value);
+                        }
+                    }
+                }
+            }
         }
 
         private void ReadBlock() // Tokenizing and Parsing of the entire code block.
@@ -144,7 +224,7 @@ namespace Enlang.Components.Misc
                 }
                 else // Variables
                 {
-                    string key = words[0].Trim();
+                    string key = words[0].Trim(); // This implementation is wrong fml -_- I'm gonna rewrite later...
 
 
                     if (_Variables.ContainsKey(key)) // if the variable already exists
@@ -159,7 +239,7 @@ namespace Enlang.Components.Misc
                         else // if not we store the value directly
                         {
                             string dtype = DetermineDataType(value);
-                            data = ConvertValue(data, dtype, value);
+                            data = ConvertValue(dtype, value);
 
 
                             if (_Variables.ContainsKey(value)) // if the expression is a fellow variable just incase
@@ -186,7 +266,7 @@ namespace Enlang.Components.Misc
                         else
                         {
                             string dtype = DetermineDataType(value);
-                            data = ConvertValue(data, dtype, value);
+                            data = ConvertValue(dtype, value);
 
 
                             if (_Variables.ContainsKey(value)) // if the expression is a fellow variable just incase
