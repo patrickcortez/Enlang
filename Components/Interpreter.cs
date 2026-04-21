@@ -335,84 +335,89 @@ namespace Enlang.Components
 
         private void Execute(Types type,string line,List<string>? BlockBuffer = null) // Execute instructions
         {
-
-            if (debug)
-            {
-                Debug($"Current Instruction: {type}");
-            }
-
-            if(type == Types.Print)
-            {
-                print(line);
-            }
-            
-            if(type == Types.Input)
-            {
-               Variables[line] = input();
-            }
-
-            if(type == Types.Variable)
-            {
-                HandleVariable(line);
-            }
-
-            if(type == Types.If)
-            {
-
-                if (debug)
-                {
-                    Debug($"Current If: {line}");
-                }
-
-                if (IFSuccess)
-                {
-                    IFSuccess = !IFSuccess;
-                }
-
-                HandleCondition(line);
-
-                if (IFSuccess)
-                {
-                    Variables = HandleBlock(BlockBuffer);
-                }
-
-            }
-
-            if(type == Types.Elif && !IFSuccess)
-            {
-
-                if (debug)
-                {
-                    Debug($"Current Elif: {line}");
-                }
-
-                HandleCondition(line);
-                if (IFSuccess)
-                {
-                    Variables = HandleBlock(BlockBuffer);
-                }
-            }
-
-            if(type == Types.Else && !IFSuccess)
+            try
             {
                 if (debug)
                 {
-                    Debug($"Current Else: {line}");
+                    Debug($"Current Instruction: {type}");
                 }
 
-                if (IFSuccess)
+                if (type == Types.Print)
                 {
-                    Variables = HandleBlock(BlockBuffer);
+                    print(line);
                 }
-            }
 
-            if(type == Types.Error && debug)
+                if (type == Types.Input)
+                {
+                    Variables[line] = input();
+                }
+
+                if (type == Types.Variable)
+                {
+                    HandleVariable(line);
+                }
+
+                if (type == Types.If)
+                {
+
+                    if (debug)
+                    {
+                        Debug($"Current If: {line}");
+                    }
+
+                    if (IFSuccess)
+                    {
+                        IFSuccess = !IFSuccess;
+                    }
+
+                    HandleCondition(line);
+
+                    if (IFSuccess)
+                    {
+                        Variables = HandleBlock(BlockBuffer);
+                    }
+
+                }
+
+                if (type == Types.Elif && !IFSuccess)
+                {
+
+                    if (debug)
+                    {
+                        Debug($"Current Elif: {line}");
+                    }
+
+                    HandleCondition(line);
+                    if (IFSuccess)
+                    {
+                        Variables = HandleBlock(BlockBuffer);
+                    }
+                }
+
+                if (type == Types.Else && !IFSuccess)
+                {
+                    if (debug)
+                    {
+                        Debug($"Current Else: {line}");
+                    }
+
+                    if (IFSuccess)
+                    {
+                        Variables = HandleBlock(BlockBuffer);
+                    }
+                }
+
+                if (type == Types.Error && debug)
+                {
+                    if (line.Length < 1)
+                    {
+                        return;
+                    }
+                    Debug($"Error: {line}");
+                }
+            }catch(Exception ex)
             {
-                if (line.Length < 1)
-                {
-                    return;
-                }
-                Debug($"Error: {line}");
+                Debug(ex.Message, true);
             }
         }
 

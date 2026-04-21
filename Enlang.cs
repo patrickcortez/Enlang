@@ -167,6 +167,13 @@ public class Enlang // this class acts as a entry point to the interpreter and a
                 //evaluator 
                 if (args[0] == "run") // running .enl script
                 {
+
+                    if(args.Count() < 2)
+                    {
+                        Run(currentFile);
+                        return;
+                    }
+
                     if (Path.IsPathRooted(args[1]))
                     {
                         Run(args[1]);

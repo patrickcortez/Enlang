@@ -19,6 +19,13 @@ using static Enlang.Utils.Utility;
 // Note that only elif's has conditions, and the last code block 'else' will always run if 
 // the main if and elifs are all false.
 
+/*
+ * Dev Notes:
+ * You know the more I work on this, the more stupid my interpreter looks and feels -_-
+ * FML... But Alas! I have to finish what I started. Next Project I am implementing an AST tree 
+ * that way its less long & complex, more readable and scalable.
+ */
+
 namespace Enlang.Components.Misc
 {
     internal class Block // code block for Functions, if else and loops
@@ -28,7 +35,8 @@ namespace Enlang.Components.Misc
         private List<Token> Instructions; // The blocks own list of Instruction Defined between its braces
         bool _Condition; // if blocks condition has been set to true, also an indicator if the block has successfully executed
         string[] CodeBlock; // Storage of the strings before its parsed as Tokens.
-        bool debug;
+        bool debug,IFSuccess;
+        string[] operators = { "==", ">", "<", ">=", "<=" };
 
         private bool isSyntax(string word, ref string current, char terminator) // Syntax Checker
         {
@@ -52,7 +60,25 @@ namespace Enlang.Components.Misc
             }
 
 
-            return false; //place holder will implement tomorrow
+            return false; 
+        }
+
+        private bool HasVariables(string data)
+        {
+            if (debug)
+            {
+                Debug($"Current Value in inspection: {data}");
+            }
+
+            foreach (string key in _Variables.Keys)
+            {
+                if (data.Contains(key))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private void print(string msg, bool isError = false) //handle output
@@ -80,7 +106,7 @@ namespace Enlang.Components.Misc
             }
         }
 
-        private object input() // handle input
+        private object input() // handle input... Duhhh i mean its self explenatory
         {
             object variable;
 
@@ -97,7 +123,8 @@ namespace Enlang.Components.Misc
             CodeBlock = block;
             _Condition = isTrue; // _Condition is always fault by default.
             debug = isDebug;
-            if (isTrue)
+            IFSuccess = false;
+            if (isTrue) // if the current if block is true then we read and execute. Simple yet its gonna be a long operation, not to mention this is Just a Control Block, we havent reached Function and Loop Blocks T_T...
             {
                 ReadBlock();
                 ExecuteBlock();
@@ -138,154 +165,312 @@ namespace Enlang.Components.Misc
             return value;
         }
 
-        private void ExecuteBlock()
+        private void HandleCondition(string condition)
         {
-            foreach(Token tok in Instructions)
-            {
-                if(tok.type == Types.Print)
-                {
-                    print(tok.line);
-                }else if(tok.type == Types.Input)
-                {
-                    if (_Variables.ContainsKey(tok.line))
-                    {
-                        _Variables[tok.line] = input();
-                    }
-                    else
-                    {
-                        Debug($"Variable: {tok.line} does not exist!",true);
-                        continue;
-                    }
-                }else if(tok.type == Types.Variable) // if current token is variable
-                {
-                    string[] var = Tokenize(tok.line, '=');
-                    string key = var[0].Trim(),value=var[1];
-                    string dtype = DetermineDataType(value);
+            Condition[] conds = TokenizeCondition(condition).ToArray(); // && , ||
 
-                    if (_Variables.ContainsKey(key))
+            if (debug)
+            {
+                Debug($"Current Condition: {condition}");
+            }
+
+            if (conds.Count() < 1)
+            {
+                string expression = condition.TrimStart('(').TrimEnd(')').Replace(" ", "");
+                string value1, value2;
+                string[] evals = TokenizeExpression(expression);
+                string currentOps = GetOperation(condition);
+
+
+
+                if (operators.Contains(currentOps))
+                {
+
+                    object val1, val2;
+                    string dtype1 = DetermineDataType(evals[0]), dtype2 = DetermineDataType(evals[1]);
+
+
+                    if (HasVariables(condition))
                     {
-                        if (_Variables.ContainsKey(value))
+                        if (_Variables.ContainsKey(evals[0]))
                         {
-                            _Variables[key] = _Variables[value];
+                            val1 = _Variables[evals[0]];
                         }
                         else
                         {
-                            _Variables[key] = ConvertValue(dtype,value);
+                            val1 = ConvertValue(dtype1, evals[0]);
+                        }
+
+                        if (_Variables.ContainsKey(evals[1]))
+                        {
+                            val2 = _Variables[evals[1]];
+                        }
+                        else
+                        {
+                            val2 = ConvertValue(dtype2, evals[1]);
                         }
                     }
+                    else
+                    {
+                        val1 = ConvertValue(dtype1, evals[0]);
+                        val2 = ConvertValue(dtype2, evals[1]);
+                    }
+
+                    if (currentOps == "==")
+                    {
+                        if (val1 == val2)
+                        {
+                            IFSuccess = true;
+                        }
+                        else
+                        {
+                            IFSuccess = false;
+                        }
+                    }
+                    else if (currentOps == ">")
+                    {
+                        if ((float)val1 > (float)val2)
+                        {
+                            IFSuccess = true;
+                        }
+                        else
+                        {
+                            IFSuccess = false;
+                        }
+                    }
+                    else if (currentOps == "<")
+                    {
+                        if ((float)val1 < (float)val2)
+                        {
+                            IFSuccess = true;
+                        }
+                        else
+                        {
+
+                        }
+                    }
+
+
                 }
             }
         }
 
-        private void ReadBlock() // Tokenizing and Parsing of the entire code block.
+        private void ExecuteBlock()
         {
-            char[] sep = { '=' };
-            string current = string.Empty;
-            object? data = null;
-            foreach(string line in CodeBlock)
+            try
             {
-
-                if (string.IsNullOrWhiteSpace(line)) // Ignore Newlines
+                foreach (Token tok in Instructions)
                 {
-                    continue;
-                }
-
-                if (line.StartsWith('#')) // Ignore Comments
-                {
-                    continue;
-                }
-
-                string[] words = Tokenize(line,sep);
-
-                if(words.Length < 2)
-                {
-                    if(isSyntax(line,ref current, '('))
+                    if (tok.type == Types.Print)
                     {
-                        string key = words[0].Remove(words[0].IndexOf('('), words[0].Length - current.Length).Trim();
-                        string value = words[0].Remove(0, key.Length);
-                        value = value.TrimStart('(').TrimEnd(')'); //remove parenthesis
-                        value = value.Replace("\"",""); // remove quotes
-
-                        if(key == "print")
+                        print(tok.line);
+                    }
+                    else if (tok.type == Types.Input)
+                    {
+                        if (_Variables.ContainsKey(tok.line))
                         {
-                            Instructions.Add(new Token(Types.Print,value));
-                            continue;
-                        }else if(key == "input")
+                            _Variables[tok.line] = input();
+                        }
+                        else
                         {
-                            Instructions.Add(new Token(Types.Input, value));
+                            Debug($"Variable: {tok.line} does not exist!", true);
                             continue;
                         }
                     }
-                    else
+                    else if (tok.type == Types.Variable) // if current token is variable
                     {
-                        Instructions.Add(new Token(Types.Error, line));
-                    }
-                    
-                }
-                else // Variables
-                {
-                    string key = words[0].Trim(); // This implementation is wrong fml -_- I'm gonna rewrite later...
+                        string[] var = Tokenize(tok.line, '=');
+                        string key = var[0].Trim(), value = var[1];
+                        string dtype = DetermineDataType(value);
 
-
-                    if (_Variables.ContainsKey(key)) // if the variable already exists
-                    {
-                        string value = ReplaceWords(words[1], _Variables.Keys.ToArray(), _Variables, '$');
-                        if (isArithmetic(value)) // if the expression is an arithmetic
+                        if (_Variables.ContainsKey(key))
                         {
-                            Arithmetic arith = new Arithmetic(value);
-                            _Variables[key] = arith.Begin();
-                            continue;
-                        }
-                        else // if not we store the value directly
-                        {
-                            string dtype = DetermineDataType(value);
-                            data = ConvertValue(dtype, value);
-
-
-                            if (_Variables.ContainsKey(value)) // if the expression is a fellow variable just incase
+                            if (_Variables.ContainsKey(value))
                             {
                                 _Variables[key] = _Variables[value];
                                 continue;
                             }
-                            else // if not store the data normally
+                            else
                             {
-                                _Variables[key] = data;
+                                _Variables[key] = ConvertValue(dtype, value);
+                                continue;
+                            }
+                        }
+                        else
+                        {
+
+                            if (LocalVariables.ContainsKey(value))
+                            {
+                                LocalVariables.Add(key, LocalVariables[value]);
+                                continue;
+                            }
+
+                            if (_Variables.ContainsKey(value))
+                            {
+                                LocalVariables.Add(key, _Variables[value]);
+                                continue;
+                            }
+                            else
+                            {
+                                LocalVariables.Add(key, value);
                                 continue;
                             }
                         }
                     }
-                    else
+                    else if (tok.type == Types.If)
                     {
-                        string value = ReplaceWords(words[1], _Variables.Keys.ToArray(), _Variables, '$');
-                        if (isArithmetic(value)) // if the expression is an arithmetic
+                        bool isCond = false;
+
+                        if (IFSuccess)
                         {
-                            Arithmetic arith = new Arithmetic(value);
-                            _Variables.Add(key,arith.Begin());
+                            IFSuccess = !IFSuccess;
+                        }
+
+                        HandleCondition(tok.line);
+
+                        if (IFSuccess)
+                        {
+                            _Variables = HandleBlock();
                             continue;
+                        }
+                    }
+                    else if (tok.type == Types.Elif)
+                    {
+                        HandleCondition(tok.line);
+
+                        if (IFSuccess)
+                        {
+                            _Variables = HandleBlock();
+                            continue;
+                        }
+                    }
+                    else if (tok.type == Types.Else)
+                    {
+                        HandleCondition(tok.line);
+
+                        if (IFSuccess)
+                        {
+                            _Variables = HandleBlock();
+                            continue;
+                        }
+                    }
+
+                }
+            }catch(Exception ex)
+            {
+                Debug(ex.Message, true);
+            }
+        }
+
+        private Dictionary<string,object> HandleBlock()
+        {
+            Block nblock = new Block(_Variables, CodeBlock, IFSuccess);
+            return nblock.GetVariables();
+        }
+
+        private void ReadBlock() // Tokenizing and Parsing of the entire code block.
+        {
+            try
+            {
+                char[] sep = { '=' };
+                string current = string.Empty, previousCondition = string.Empty;
+                object? data = null;
+                List<string> BlockBuffer = new List<string>();
+                Types previous = new Types();
+                bool IfBlock = false;
+                foreach (string line in CodeBlock)
+                {
+
+                    if (string.IsNullOrWhiteSpace(line)) // Ignore Newlines
+                    {
+                        continue;
+                    }
+
+                    if (line.StartsWith('#')) // Ignore Comments
+                    {
+                        continue;
+                    }
+
+                    if ((line.StartsWith('{') && previous == Types.If || previous == Types.Elif || previous == Types.Else) && !IfBlock)
+                    {
+                        IfBlock = true;
+                        continue;
+                    }
+
+                    if ((line.StartsWith('{') && previous == Types.If || previous == Types.Elif || previous == Types.Else) && IfBlock) // after the Reader has read all the instructions in the if block we will add the BlockBuffer to the List of Instructions
+                    {
+                        IfBlock = false;
+
+                        Instructions.Add(new Token(previous, previousCondition, "", BlockBuffer));
+                        continue;
+                    }
+
+
+
+                    string[] words = Tokenize(line, sep);
+
+                    if (words.Length < 2)
+                    {
+                        if (isSyntax(line, ref current, '('))
+                        {
+                            string key = words[0].Remove(words[0].IndexOf('('), words[0].Length - current.Length).Trim();
+                            string value = words[0].Remove(0, key.Length);
+                            value = value.TrimStart('(').TrimEnd(')'); //remove parenthesis
+                            value = value.Replace("\"", ""); // remove quotes
+
+                            if (key == "print")
+                            {
+                                if (IfBlock)
+                                {
+                                    BlockBuffer.Add(line);
+                                    continue;
+                                }
+
+                                Instructions.Add(new Token(Types.Print, value));
+                                continue;
+                            }
+                            else if (key == "input")
+                            {
+                                if (IfBlock)
+                                {
+                                    BlockBuffer.Add(line);
+                                    continue;
+                                }
+
+                                Instructions.Add(new Token(Types.Input, value));
+                                continue;
+                            }
+                            else if (key == "if") // Assuming there is no nesting (Just Yet)
+                            {
+                                previous = Types.If;
+                                previousCondition = value.Trim();
+                                continue;
+                            }
                         }
                         else
                         {
-                            string dtype = DetermineDataType(value);
-                            data = ConvertValue(dtype, value);
-
-
-                            if (_Variables.ContainsKey(value)) // if the expression is a fellow variable just incase
-                            {
-                                _Variables.Add(key, _Variables[value]);
-                                continue;
-                            }
-                            else // if not store the data normally
-                            {
-                                _Variables.Add(key,data);
-                                continue;
-                            }
+                            Instructions.Add(new Token(Types.Error, line));
                         }
+
+                    }
+                    else // Variables
+                    {
+                        if (IfBlock)
+                        {
+                            BlockBuffer.Add(line);
+                            continue;
+                        }
+
+                        Instructions.Add(new Token(Types.Variable, line));
+                        continue;
+
                     }
 
 
                 }
-
-                
+            }catch(Exception ex)
+            {
+                Debug(ex.Message, true);
             }
         }
 
@@ -294,9 +479,6 @@ namespace Enlang.Components.Misc
             return _Variables;
         }
 
-        // Stuff I have yet to implement: Block Execution
-        // If-elif-else Execution
-        // Condition Handling
 
         // So far i have added the tokenizing of if elif and else in the Core.cs, and its code block, now for the main part, its code block handling, condition parsing and Block execution
 
