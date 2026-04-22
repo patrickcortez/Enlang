@@ -1,5 +1,6 @@
 ﻿using Enlang.Components;
 using System.ComponentModel.Design;
+using System.IO.Pipelines;
 using Terminal.Gui;
 using static Enlang.Utils.Utility;
 
@@ -216,6 +217,7 @@ public class Enlang // this class acts as a entry point to the interpreter and a
                 }
                 else if (args[0] == "exit") // exit the interactive shell
                 {
+                    Console.WriteLine("Bye...");
                     Environment.Exit(0);
                 }
                 else if (args[0] == "cd") //basic navigation.

@@ -115,6 +115,23 @@ namespace Enlang.Utils
 
             return nStr.ToString();
         }
+        private static int InstanceCount(string data,char[] sep) // Counts the instances of a seperator: The fix to the tokenizing problem in if else conditions
+        {
+            int instance = 0;
+            foreach(char c in data)
+            {
+                if (sep.Contains(c))
+                {
+                    instance++;
+                }
+                else
+                {
+                    continue;
+                }
+            }
+
+            return instance;
+        }
 
         public static string[] Tokenize(string data,params char[] seperators)
         {
@@ -146,8 +163,10 @@ namespace Enlang.Utils
                     continue;
                 }
 
-                if (seperators.Contains(c)) // '=',',', etc...
+                if (seperators.Contains(c) && InstanceCount(data,seperators) > 2) // '=',',', etc...
                 {
+                    // If the amount of seperator instances is greater than 1 then we skip adding to string List
+
                     tmp.Add(nstr.ToString()); // store to String List once we encounter any Seperator.
                     nstr.Clear();
                     continue;

@@ -17,7 +17,7 @@ namespace Enlang.Components
         List<string> lines;
         List<string> BlockBuffer;
         List<Token> Instructions;
-        bool debug;
+        bool debug,readFail = false;
 
 #nullable disable
 
@@ -38,6 +38,7 @@ namespace Enlang.Components
             debug = isDebug;
             filepath = src;
             Instructions = new List<Token>();
+            BlockBuffer = new List<string>();
             Lex();
         }
 
@@ -126,6 +127,9 @@ namespace Enlang.Components
 
                         string current = string.Empty;
                         string[] words = Tokenize(line, '='); // We tokenize the entire line before evaluating
+                        // Error: Tokenizer Splits the if statements because of the '=='
+                        // TODO: Find a way to avoid tokenizing in if-elif-else statements.
+                        // I'll do that later or tomorrow
 
 
                         if (words.Length < 2) // if the length of words is less than 2, its always an instruction
@@ -133,7 +137,15 @@ namespace Enlang.Components
 
                             if (isSyntax(words[0], ref current, '(')) // bug, somewhere in this line
                             {
-                                string instruction = words[0].Remove(words[0].IndexOf('('), words[0].Length - current.Length); // print("Hello") : print -> 5, ("hello") - 9 over all its 14 - 5
+                                string instruction = string.Empty;
+                                if (line.Contains('(')) // print("Hello") : print -> 5, ("hello") - 9 over all its 14 - 5
+                                { 
+                                    instruction = words[0].Remove(words[0].IndexOf('('), words[0].Length - current.Length); 
+                                } 
+                                else 
+                                {
+                                    instruction = words[0];
+                                } 
                                 string data = words[0].Remove(0, current.Length);
                                 data = data.TrimStart('(').TrimEnd(')');
                                 
@@ -153,7 +165,7 @@ namespace Enlang.Components
                                 {
                                     if (IFBlock)
                                     {
-                                        BlockBuffer.Add(line);
+                                        BlockBuffer.Add(line); 
                                         continue;
                                     }
                                     Instructions.Add(new Token(Types.Print, data)); // (message)
@@ -255,19 +267,38 @@ namespace Enlang.Components
 
             }catch(Exception ex)
             {
-                Console.Error.WriteLine(ex.Message);
-                Environment.Exit(1);
+
+                string exceptionMSG = $@"
+                    Cause: {ex.StackTrace}
+
+                    Exception Message: {ex.Message}
+
+                ";
+                Debug(exceptionMSG, true);
+                readFail = true;
             }
         }
 
         internal void BeginInterpret()
         {
-            if (debug)
-            {
-                Debug("Interpretting Began!");
-            }
 
-            Interpreter interpret = new Interpreter(Instructions,debug);
+            if (!readFail)
+            {
+
+                if (debug)
+                {
+                    Debug("Interpretting Started:");
+                }
+
+                Interpreter interpret = new Interpreter(Instructions, debug);
+            }
+            else
+            {
+                if (debug)
+                {
+                    Debug("Interpretting Stopped!");
+                }
+            }
         }
     }
 }
