@@ -51,7 +51,9 @@ with simple linux like commands:
 
 ## Status
 
-The current status of **Erlang** is still work in progress.
+Loc: 2.5k
+
+The current status of **Enlang** is still work in progress.
 I have alot to implement:
 
 Implemented:
@@ -65,10 +67,10 @@ Implemented:
 - Arithmetic
 - Comments
 - TUI Text Editor
+- Control Flow (if-elif-else) (50%)
 
 Yet to be implemented:
 - Functions
-- Control Flow (if-elif-else)
 - Arrays
 - Loops (While and For)
 
