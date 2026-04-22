@@ -261,6 +261,12 @@ namespace Enlang.Components.Misc
             {
                 foreach (Token tok in Instructions)
                 {
+                    if (debug)
+                    {
+                        Debug($"Current Token:{tok.type} , Tokens line: {tok.line}");
+                    }
+
+
                     if (tok.type == Types.Print)
                     {
                         print(tok.line);
@@ -380,6 +386,11 @@ namespace Enlang.Components.Misc
                 bool IfBlock = false;
                 foreach (string line in CodeBlock)
                 {
+
+                    if (debug)
+                    {
+                        Debug($"Current Line in Reading: {line}");
+                    }
 
                     if (string.IsNullOrWhiteSpace(line)) // Ignore Newlines
                     {

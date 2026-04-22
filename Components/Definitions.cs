@@ -70,7 +70,8 @@
             }else if(tokentype == Types.If || tokentype == Types.Elif || tokentype == Types.Else)
             {
                 type = tokentype;
-                BlockBuffer = TmpBlockBuffer;
+                line = ln;
+                BlockBuffer = new List<string>(TmpBlockBuffer);
             }
             else // Otherwise we leave it variable uninitialized and just store the tokentype.
             {

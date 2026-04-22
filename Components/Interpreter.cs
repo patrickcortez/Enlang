@@ -232,19 +232,37 @@ namespace Enlang.Components
                 }
             }catch(Exception ex)
             {
-                Debug(ex.Message,true);
+                string exceptionMSG = $@"
+                    Cause: {ex.StackTrace}
+
+                    Exception Message: {ex.Message}
+
+                ";
+                Debug(exceptionMSG, true);
             }
         }
 
         private Dictionary<string,object> HandleBlock(List<string> BlockBuffer) // Handles Block Execution.
         {
-            Block tmp = new Block(Variables, BlockBuffer.ToArray());
+
+            if (debug)
+            {
+                Debug($"Block Running with a Buffer size of {BlockBuffer.Count}");
+            }
+
+            Block tmp = new Block(Variables, BlockBuffer.ToArray(),IFSuccess);
             return tmp.GetVariables();
         }
 
         private void HandleCondition(string condition)
         {
-            Condition[] conds = TokenizeCondition(condition).ToArray(); // && , ||
+            List<Condition> conds = new List<Condition>();
+
+            if (condition.Contains('&') || condition.Contains('|'))
+            {
+               conds.AddRange(TokenizeCondition(condition, "&&", "||").ToList()); // && , ||
+            }
+
 
             if (debug)
             {
@@ -370,10 +388,19 @@ namespace Enlang.Components
                         IFSuccess = !IFSuccess;
                     }
 
+
                     HandleCondition(line);
+
+
 
                     if (IFSuccess)
                     {
+
+                        if (debug)
+                        {
+                            Debug("Block Buffer Started");
+                        }
+
                         Variables = HandleBlock(BlockBuffer);
                     }
 
@@ -401,10 +428,10 @@ namespace Enlang.Components
                         Debug($"Current Else: {line}");
                     }
 
-                    if (IFSuccess)
-                    {
-                        Variables = HandleBlock(BlockBuffer);
-                    }
+                    IFSuccess = true;
+                    Variables = HandleBlock(BlockBuffer);
+                    IFSuccess = false;
+                    
                 }
 
                 if (type == Types.Error && debug)
@@ -417,7 +444,13 @@ namespace Enlang.Components
                 }
             }catch(Exception ex)
             {
-                Debug(ex.Message, true);
+                string exceptionMSG = $@"
+                    Cause: {ex.StackTrace}
+
+                    Exception Message: {ex.Message}
+
+                ";
+                Debug(exceptionMSG, true);
             }
         }
 
@@ -466,12 +499,13 @@ namespace Enlang.Components
 
                 if (instruction.type == Types.If || instruction.type == Types.Elif || instruction.type == Types.Else)
                 {
-                    Execute(instruction.type, instruction.line);
+                    Execute(instruction.type, instruction.line,instruction.BlockBuffer);
                 }
                 else
                 {
                     Execute(instruction.type, instruction.line);
                 }
+
                 AdvanceTo();
 
 

@@ -118,6 +118,18 @@ namespace Enlang.Components
 
                         if(line.Trim().StartsWith('}') && IFBlock == true)
                         {
+
+                            if (debug)
+                            {
+                                if (previous == Types.Elif || previous == Types.If)
+                                {
+                                    Debug($"Stored {previous}! | Condition: {prevCondition} | BufferSize: {BlockBuffer.Count}");
+                                }else if(previous == Types.Else)
+                                {
+                                    Debug($"Stored {previous}! | BufferSize: {BlockBuffer.Count}");
+                                }
+                            }
+
                             Instructions.Add(new Token(previous,prevCondition,"",BlockBuffer));
                             prevCondition = string.Empty;
                             BlockBuffer.Clear();
@@ -191,7 +203,7 @@ namespace Enlang.Components
                                     }
 
                                     data = data.Trim();
-                                    prevCondition = data;
+                                    prevCondition = line;
                                     IFBlock = true;
                                     previous = Types.If;
                                     continue;
